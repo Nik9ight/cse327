@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "380890797705",
+    "project_id": "llm-app-8576e",
+    "storage_bucket": "llm-app-8576e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380890797705:android:6bdf6abc070ed12d0fd858",
+        "android_client_info": {
+          "package_name": "com.example.llmapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOfNwkp4Iy1WIYFwX9J5yVuwosNLe8Kjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

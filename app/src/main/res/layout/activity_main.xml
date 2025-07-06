@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/inputText"
+        android:layout_width="385dp"
+        android:layout_height="95dp"
+        android:hint="Type your message" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send" />
+
+    <Button
+        android:id="@+id/attachImageButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Attach Image" />
+
+    <ImageView
+        android:id="@+id/selectedImageView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Selected image preview"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/stopResponseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop Response" />
+
+    <TextView
+        android:id="@+id/outputText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="16dp"
+        android:text="Response will appear here"
+        android:scrollbars="vertical"
+        android:gravity="start|top"/>
+</LinearLayout>
