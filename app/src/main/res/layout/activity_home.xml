@@ -30,6 +30,20 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
+        android:id="@+id/telegramSetupButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Setup Telegram Bot"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/pipelineButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Email to Telegram Pipeline"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
         android:id="@+id/m1Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

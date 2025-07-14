@@ -26,7 +26,7 @@ class llmChatView(val model: Model) : ViewModel() {
         context: Context,
         input: String,
         images: List<MPImage> = listOf(),
-        onResult: (String) -> Unit,
+        onResult: (String, Boolean) -> Unit,
         onError: (String) -> Unit
     ) {
         viewModelScope.launch(Dispatchers.Default) {
@@ -40,25 +40,39 @@ class llmChatView(val model: Model) : ViewModel() {
                     model = model,
                     input = input,
                     images = images,
-                    resultListener = { partialResult, done ->
-                        lastResult = partialResult
-                        onResult(partialResult)
-                        if (done) inProgress = false
-                    },
+                    resultListener = onResult,
                     cleanUpListener = {
                         inProgress = false
                     }
                 )
             } catch (e: Exception) {
-                Log.e(TAG, "Error occurred while running inference", e)
+                onError("Error: ${e.message}")
                 inProgress = false
-                onError(e.message ?: "Unknown error")
             }
         }
     }
+    
+    // Keep backward compatibility with old method signature
+    fun generateResponse(
+        context: Context,
+        input: String,
+        images: List<MPImage> = listOf(),
+        onResult: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        generateResponse(
+            context = context,
+            input = input,
+            images = images,
+            onResult = { result, _ -> onResult(result) },
+            onError = onError
+        )
+    }
+    
     fun stopResponse(model: Model) {
-        Log.d(TAG, "Stopping response for model ${model.name}...")
-        val instance = model.instance as? LlmModelInstance ?: return
-        instance.session.cancelGenerateResponseAsync()
+        if (inProgress) {
+            llmchatmodel.resetSession(model)
+            inProgress = false
+        }
     }
 }

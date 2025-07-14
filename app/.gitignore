@@ -1,1 +1,39 @@
+# Build files
 /build
+
+# Generated files
+src/main/gen/
+src/debug/gen/
+
+# Debug keystore and properties
+debug.keystore
+debug.properties
+
+# Release keystore and properties
+release.keystore
+release.properties
+
+# Google services
+# Uncomment if you want to exclude the google-services.json file
+# google-services.json
+
+# Firebase
+google-services.json.bak
+
+# Local configuration
+local.properties
+
+# Proguard files
+/proguard-*.txt
+!/proguard-rules.pro
+
+# Code coverage
+*.ec
+*.em
+jacoco.exec
+
+# Build outputs
+*.hprof
+
+# App-specific generated files
+/schemas/

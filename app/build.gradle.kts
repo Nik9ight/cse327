@@ -45,6 +45,18 @@ android {
         compose = true
         buildConfig = true
     }
+    
+    packaging {
+        resources {
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/INDEX.LIST")
+            excludes.add("META-INF/ASL2.0")
+        }
+    }
 }
 
 dependencies {
@@ -94,4 +106,15 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0") // OkHttp for network requests (Telegram API)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("org.json:json:20230227") // JSON parsing
+    implementation("androidx.work:work-runtime-ktx:2.8.1") // WorkManager for background tasks
+    
+    // Gmail API dependencies
+    implementation("com.google.api-client:google-api-client-android:2.2.0")
+    implementation("com.google.oauth-client:google-oauth-client:1.34.1")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20230515-2.0.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.http-client:google-http-client-gson:1.43.3")
 }
