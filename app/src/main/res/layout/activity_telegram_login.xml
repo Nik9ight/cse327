@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Telegram Bot Setup"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Step 1: Enter your Telegram Bot Token"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/botTokenHelpText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="To create a bot and get a token, open Telegram and search for @BotFather. Follow the instructions to create a new bot."
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/botTokenEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Bot Token (format: 123456789:ABCDefGhIJKlmNoPQRsTUVwxyZ)"
+            android:inputType="text"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/connectBotButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect Bot"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Step 2: Enter Chat ID or Group ID"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/chatIdHelpText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="For groups, the chat ID must start with -100 followed by numbers (e.g., -1001234567890). For personal chats, it's just numbers. Important: Your bot must be added to the group first!"
+            android:textSize="12sp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/chatIdEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Chat ID (e.g., -1001234567890)"
+            android:inputType="text"
+            android:layout_marginBottom="8dp" />
+            
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="❗ Common errors: Bot not added to group, incorrect format, or missing permissions"
+            android:textStyle="italic"
+            android:textColor="#CC0000"
+            android:textSize="12sp"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/findChatIdButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Help me find Chat ID"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/saveChatIdButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Chat ID"
+            android:layout_marginBottom="24dp" />
+
+        <Button
+            android:id="@+id/testMessageButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send Test Message"
+            android:enabled="false" />
+            
+        <Button
+            android:id="@+id/troubleshootButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Help with Chat ID Issues"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Troubleshooting:\n1. Make sure your bot token is correct\n2. Add your bot to the group/chat first\n3. Make sure your bot has permissions to send messages"
+            android:textSize="12sp"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

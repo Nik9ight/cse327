@@ -36,6 +36,8 @@ class HomeActivity : ComponentActivity() {
 
         val signInButton = findViewById<Button>(R.id.signInButton)
         val enablePermissionsButton = findViewById<Button>(R.id.enablePermissionsButton)
+        val telegramSetupButton = findViewById<Button>(R.id.telegramSetupButton)
+        val pipelineButton = findViewById<Button>(R.id.pipelineButton)
         m1Button = findViewById(R.id.m1Button)
         val textImageButton = findViewById<Button>(R.id.textImageButton)
 
@@ -49,6 +51,16 @@ class HomeActivity : ComponentActivity() {
             } else {
                 permissions.requestPermissions(requiredPermissions, RC_PERMISSIONS)
             }
+        }
+
+        telegramSetupButton.setOnClickListener {
+            val intent = Intent(this, TelegramLoginActivity::class.java)
+            startActivity(intent)
+        }
+
+        pipelineButton.setOnClickListener {
+            val intent = Intent(this, PipelineActivity::class.java)
+            startActivity(intent)
         }
 
         m1Button.setOnClickListener {
