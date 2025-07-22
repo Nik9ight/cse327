@@ -12,7 +12,28 @@
           "package_name": "com.example.llmapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "380890797705-3bh8kbh74caqmhdi3419rb9ushlpemsf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.llmapp",
+            "certificate_hash": "eae65db2a8994a971f8f8839481b1cb45b0a6d2b"
+          }
+        },
+        {
+          "client_id": "380890797705-ampg6suva3pphhtkmpqq6igfpdcragre.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.llmapp",
+            "certificate_hash": "53e70585f5c27ff6faf6efbcb93e3e8d21b08090"
+          }
+        },
+        {
+          "client_id": "380890797705-ii02r4tjb7ibsaauli2okg69e3m0cn41.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAOfNwkp4Iy1WIYFwX9J5yVuwosNLe8Kjo"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "380890797705-ii02r4tjb7ibsaauli2okg69e3m0cn41.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

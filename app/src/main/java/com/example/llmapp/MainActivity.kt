@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
@@ -79,7 +80,17 @@ class MainActivity : ComponentActivity() {
         }
 
         stopResponseButton.setOnClickListener {
-            chatView.stopResponse(model)
+            if (chatView.inProgress) {
+                // No need to pass the model since chatView already has it
+                chatView.stopResponse(model)
+                Toast.makeText(this, "Response generation stopped", Toast.LENGTH_SHORT).show()
+                
+                // Add a visual indicator that response was stopped
+                outputAccumulator.append("\n\n[Response generation stopped by user]")
+                outputText.text = outputAccumulator.toString()
+            } else {
+                Toast.makeText(this, "No response generation in progress", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

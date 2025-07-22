@@ -66,9 +66,19 @@ object llmchatmodel {
             Log.d(TAG, "Resetting session for model '${model.name}'")
 
             val instance = model.instance as LlmModelInstance? ?: return
-            val session = instance.session
-            session.close()
+            
+            // The LLM MediaPipe API doesn't have a direct method to cancel generation
+            // We'll close the session which should stop any ongoing processing
+            Log.d(TAG, "Attempting to stop generation by closing session")
+            
+            // Close the current session
+            try {
+                instance.session.close()
+            } catch (e: Exception) {
+                Log.d(TAG, "Failed to close session: ${e.message}")
+            }
 
+            // Create a new session
             val inference = instance.engine
             val topK = 64
             val topP = 0.95f
@@ -88,6 +98,10 @@ object llmchatmodel {
                         .build(),
                 )
             instance.session = newSession
+            
+            // Execute the cleanUpListener to notify that processing is done
+            cleanUpListeners[model.name]?.invoke()
+            
             Log.d(TAG, "Resetting done")
         } catch (e: Exception) {
             Log.d(TAG, "Failed to reset session", e)
@@ -138,10 +152,26 @@ object llmchatmodel {
         // Start async inference.
         val session = instance.session
         if (input.trim().isNotEmpty()) {
-            session.addQueryChunk(input)
+            try {
+                // Try to add the query chunk safely
+                Log.d(TAG, "Adding query chunk with length: ${input.length}")
+                session.addQueryChunk(input)
+                Log.d(TAG, "Successfully added query chunk")
+            } catch (e: Exception) {
+                // Handle error gracefully
+                Log.e(TAG, "Failed to add query chunk: ${e.message}", e)
+                // Notify the listener of the error
+                resultListener("Error: Failed to process input. ${e.message}", true)
+                return
+            }
         }
         for (image in images) {
-            session.addImage(image)
+            try {
+                session.addImage(image)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to add image: ${e.message}", e)
+                // Continue without the image rather than failing completely
+            }
         }
         val unused = session.generateResponseAsync(resultListener)
     }

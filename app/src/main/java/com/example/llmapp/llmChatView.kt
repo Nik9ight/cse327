@@ -71,8 +71,12 @@ class llmChatView(val model: Model) : ViewModel() {
     
     fun stopResponse(model: Model) {
         if (inProgress) {
-            llmchatmodel.resetSession(model)
+            Log.d(TAG, "Stopping response generation")
+            // Use this.model instead of the passed model parameter
+            llmchatmodel.resetSession(this.model)
             inProgress = false
+        } else {
+            Log.d(TAG, "No response generation in progress to stop")
         }
     }
 }

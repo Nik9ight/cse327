@@ -37,6 +37,10 @@
         <activity android:name=".M1Activity" />
         <activity android:name=".TelegramLoginActivity" />
         <activity android:name=".PipelineActivity" />
+        <activity 
+            android:name=".EmailSearchActivity"
+            android:label="Email Search"
+            android:parentActivityName=".HomeActivity" />
     </application>
 
 </manifest>

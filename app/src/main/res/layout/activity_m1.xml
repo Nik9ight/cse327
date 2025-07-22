@@ -36,6 +36,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Send" />
+
+        <Button
+            android:id="@+id/m1StopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Stop"
+            android:visibility="gone" />
     </LinearLayout>
 
 </LinearLayout>
