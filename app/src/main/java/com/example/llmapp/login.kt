@@ -55,8 +55,17 @@ class Login(private val activity: Activity) {
                 onError("Google Sign-In failed: account is null")
             }
         } catch (e: ApiException) {
-            Log.e(TAG, "Google Sign-In failed with status code: ${e.statusCode}", e)
-            onError("Google Sign-In failed: ${e.statusCode}")
+            val statusCode = e.statusCode
+            val statusMessage = when (statusCode) {
+                10 -> "DEVELOPER_ERROR - Check your Google Cloud Console configuration, SHA-1 fingerprint, and package name"
+                12500 -> "SIGN_IN_CANCELLED - User canceled the sign-in flow"
+                12501 -> "SIGN_IN_FAILED - Sign-in failed for some reason"
+                12502 -> "SIGN_IN_REQUIRED - Sign-in required but not attempted"
+                else -> "Unknown error code: $statusCode"
+            }
+            
+            Log.e(TAG, "Google Sign-In failed with status code: $statusCode ($statusMessage)", e)
+            onError("Google Sign-In failed: $statusMessage")
         } catch (e: Exception) {
             Log.e(TAG, "Google Sign-In unexpected error", e)
             onError("Google Sign-In failed: ${e.message}")

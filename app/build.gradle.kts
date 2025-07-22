@@ -103,7 +103,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.android.material:material:1.11.0")
-    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.android.gms:play-services-auth:21.3.0") // Using newer version only
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // OkHttp for network requests (Telegram API)
@@ -115,6 +115,13 @@ dependencies {
     implementation("com.google.api-client:google-api-client-android:2.2.0")
     implementation("com.google.oauth-client:google-oauth-client:1.34.1")
     implementation("com.google.apis:google-api-services-gmail:v1-rev20230515-2.0.0")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.http-client:google-http-client-gson:1.43.3")
+    
+    // Coroutines support - needed for async operations
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
+    // ViewModel and LiveData components
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
 }

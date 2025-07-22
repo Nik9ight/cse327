@@ -2,304 +2,187 @@ package com.example.llmapp
 
 import android.content.Context
 import android.util.Log
-import androidx.work.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
+import com.example.llmapp.pipeline.*
+import com.example.llmapp.patterns.BroadcastPipelineObserver
+import com.example.llmapp.patterns.PipelineObserver
 
+/**
+ * GmailToTelegramPipeline - Refactored to use design patterns with modular architecture
+ * 
+ * This is a facade class that provides backward compatibility with the existing
+ * codebase while delegating actual work to the new modular pipeline components.
+ * 
+ * Uses:
+ * - Strategy Pattern: For different processing strategies
+ * - Command Pattern: For email processing commands 
+ * - Observer Pattern: For notifications
+ * - Chain of Responsibility: For email processing pipeline
+ * - Factory Pattern: For creating service components
+ */
 class GmailToTelegramPipeline(
     private val context: Context,
     private val telegramService: TelegramService? = null,
     private val model: Model? = MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false),
     private val gmailService: GmailService? = null
 ) {
-    private lateinit var chatView: llmChatView
+    private val TAG = "GmailToTelegramPipeline"
     private var completionListener: PipelineCompletionListener? = null
+    
+    // The new pipeline implementation
+    private val pipeline: EmailProcessingPipeline
+    
+    // Observer pattern support for backward compatibility
+    private val observers = mutableListOf<PipelineObserver>()
     
     /**
      * Interface for pipeline completion callbacks
+     * Will be bridged to the new pipeline
      */
     interface PipelineCompletionListener {
         fun onComplete(success: Boolean, message: String)
     }
+    
+    init {
+        // Create the services
+        val emailFetchService = GmailFetchService(context, gmailService)
+        val contentProcessor = LlmContentProcessor(context, model ?: MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false))
+        val deliveryService = TelegramDeliveryService(context, telegramService)
+        
+        // Create the pipeline with the services
+        pipeline = EmailProcessingPipeline(
+            context = context,
+            fetchService = emailFetchService,
+            contentProcessor = contentProcessor,
+            deliveryService = deliveryService
+        )
+        
+        // Add legacy observer support
+        addObserver(BroadcastPipelineObserver(context))
+        
+        Log.d(TAG, "GmailToTelegramPipeline facade initialized")
+    }
+    
+    constructor(context: Context) : this(context, null, MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false), null)
     
     /**
      * Set a completion listener to be notified when processing is complete
      */
     fun setCompletionListener(listener: PipelineCompletionListener) {
         completionListener = listener
-    }
-    
-    constructor(context: Context) : this(context, null, MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false), null)
-    
-    init {
-        val modelToUse = model ?: MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false)
-        chatView = llmChatView(modelToUse)
-        chatView.initialize(context) { error ->
-            if (error.isNotEmpty()) {
-                telegramService?.sendMessage(
-                    "Error initializing LLM: $error",
-                    onSuccess = {},
-                    onError = { errMsg -> 
-                        // Log error
-                        Log.e("GmailToTelegramPipeline", "LLM init error: $errMsg")
-                    }
-                )
-                completionListener?.onComplete(false, "LLM initialization error: $error")
+        
+        // Bridge to the new pipeline
+        pipeline.setCompletionCallback(object : EmailProcessingPipeline.CompletionCallback {
+            override fun onComplete(success: Boolean, message: String) {
+                completionListener?.onComplete(success, message)
             }
+        })
+    }
+    
+    /**
+     * Add an observer to the pipeline
+     */
+    fun addObserver(observer: PipelineObserver) {
+        if (!observers.contains(observer)) {
+            observers.add(observer)
+            pipeline.addEventListenerAdapter(observer)
         }
     }
     
-    // Process Gmail message and send to Telegram
-    fun processEmail(subject: String, content: String, telegramService: TelegramService? = null, from: String = "", date: String = "") {
-        val telegramSvc = telegramService ?: this.telegramService
-        if (telegramSvc == null) {
-            Log.e("GmailToTelegramPipeline", "No TelegramService provided")
-            completionListener?.onComplete(false, "No TelegramService provided")
-            return
-        }
-        
-        val prompt = buildPrompt(subject, content)
-        
-        // Process with LLM and send to Telegram
-        processWithLLM(prompt) { llmResponse ->
-            val message = buildTelegramMessage(subject, llmResponse, from, date)
-            telegramSvc.sendMessage(
-                message,
-                onSuccess = {
-                    // Message sent successfully
-                    Log.d("GmailToTelegramPipeline", "Message sent successfully")
-                    completionListener?.onComplete(true, "Email processed and sent to Telegram")
-                },
-                onError = { error ->
-                    // Handle error
-                    Log.e("GmailToTelegramPipeline", "Failed to send message: $error")
-                    completionListener?.onComplete(false, "Failed to send message: $error")
-                }
-            )
-        }
+    /**
+     * Remove an observer from the pipeline
+     */
+    fun removeObserver(observer: PipelineObserver) {
+        observers.remove(observer)
     }
     
-    private fun buildPrompt(subject: String, content: String): String {
-        return """
-            Process this email and provide a concise summary and make it as brief as possible.
-            
-            Subject: $subject
-            
-            Content:
-            $content
-        """.trimIndent()
-    }
+    /**
+     * Process unread messages from Gmail and send them to Telegram
+     * Legacy method that delegates to the new pipeline
+     */
+    // fun process() {
+    //     pipeline.processEmailsWithSearch(query: String, 3)
+    // }
+    /**
+ * Process unread messages from Gmail and send them to Telegram
+ * Legacy method that delegates to the new pipeline
+ */
+fun process() {
+    // Get the search query if set, otherwise use default processing
+    val fetchService = getEmailFetchService() as? GmailFetchService
+    val query = fetchService?.getSearchQuery()
     
-    private fun processWithLLM(input: String, onComplete: (String) -> Unit) {
-        val outputAccumulator = StringBuilder()
-        var isCompleted = false
-        
-        try {
-            Log.d("GmailToTelegramPipeline", "Starting LLM processing with input length: ${input.length}")
-            
-            chatView.generateResponse(
-                context = context,
-                input = input,
-                images = listOf(),
-                onResult = { result, done ->
-                    Log.d("GmailToTelegramPipeline", "LLM result chunk received, done=$done")
-                    outputAccumulator.append(result)
+    if (query != null && query.isNotBlank()) {
+        Log.d(TAG, "Processing with search query: $query")
+        pipeline.processEmailsWithSearch(query, 3)
+    } else {
+        Log.d(TAG, "Processing with default settings (unread emails)")
+        pipeline.processEmails(3)
+    }
+}
                     
-                    if (done && !isCompleted) {
-                        isCompleted = true
-                        Log.d("GmailToTelegramPipeline", "LLM processing complete")
-                        onComplete(outputAccumulator.toString())
-                    }
-                },
-                onError = { error ->
-                    if (!isCompleted) {
-                        isCompleted = true
-                        Log.e("GmailToTelegramPipeline", "LLM processing error: $error")
-                        onComplete("Error processing: $error")
-                    }
-                }
-            )
-        } catch (e: Exception) {
-            if (!isCompleted) {
-                isCompleted = true
-                Log.e("GmailToTelegramPipeline", "Exception during LLM processing", e)
-                onComplete("Error: ${e.message}")
-            }
-        }
+    // No old code needed here - pipeline handles all processing
+    
+    /**
+     * Process Gmail message and send to Telegram
+     */
+    fun processEmail(subject: String, content: String, telegramService: TelegramService? = null, from: String = "", date: String = "") {
+        pipeline.processManualEmail(subject, content, from, date)
     }
     
-    private fun buildTelegramMessage(subject: String, llmResponse: String, from: String = "", date: String = ""): String {
-        val fromSection = if (from.isNotEmpty()) "\n\n<b>From:</b> ${escapeHtml(from)}" else ""
-        val dateSection = if (date.isNotEmpty()) "\n<b>Date:</b> ${escapeHtml(date)}" else ""
-        
-        // Sanitize the LLM response to avoid HTML parsing errors
-        val sanitizedResponse = escapeHtml(llmResponse)
-        
-        return """
-            📧 <b>Email Processed</b>
-            
-            <b>Subject:</b> ${escapeHtml(subject)}$fromSection$dateSection
-            
-            <b>LLM Response:</b>
-            $sanitizedResponse
-        """.trimIndent()
+    /**
+     * Check if the message source service is configured
+     */
+    fun isMessageSourceConfigured(): Boolean {
+        return pipeline.isConfigured()
     }
     
-    // Helper method to escape HTML special characters
-    private fun escapeHtml(text: String): String {
-        // Escape characters that have special meaning in HTML
-        return text
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-    }
-    
-    // Schedule periodic processing (if needed)
-    fun schedulePeriodicProcessing(intervalMinutes: Long = 15) {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-            
-        val workRequest = PeriodicWorkRequestBuilder<EmailProcessingWorker>(
-            intervalMinutes, TimeUnit.MINUTES
-        )
-            .setConstraints(constraints)
-            .build()
-            
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(
-                "gmail_processing",
-                ExistingPeriodicWorkPolicy.REPLACE,
-                workRequest
-            )
-    }
-    
-    // For demonstration purposes - process a sample email
-    fun processSampleEmail(onComplete: ((Boolean, String) -> Unit)? = null) {
-        val sampleSubject = "Meeting tomorrow at 2 PM"
-        val sampleContent = """
-            Hello team,
-            
-            Just a reminder that we have a project status meeting tomorrow at 2 PM in Conference Room A.
-            Please bring your weekly progress reports and be prepared to discuss any blockers.
-            
-            Best regards,
-            Project Manager
-        """.trimIndent()
-        
-        val sampleFrom = "project.manager@example.com"
-        val sampleDate = "Mon, 09 Jul 2025 10:30:45 +0000"
-        
-        // Set a temporary completion listener if one was provided
+    /**
+     * Method to fetch and process emails from Gmail
+     */
+    fun fetchAndProcessEmails(count: Int = 3, onComplete: ((Boolean, String) -> Unit)? = null) {
+        // Set a temporary completion callback if provided
         if (onComplete != null) {
-            val tempListener = object : PipelineCompletionListener {
+            pipeline.setCompletionCallback(object : EmailProcessingPipeline.CompletionCallback {
                 override fun onComplete(success: Boolean, message: String) {
                     onComplete(success, message)
                 }
-            }
-            setCompletionListener(tempListener)
+            })
         }
         
-        processEmail(sampleSubject, sampleContent, null, sampleFrom, sampleDate)
+        // Process emails
+        pipeline.processEmails(count)
     }
     
-    // Worker class for background processing
-    class EmailProcessingWorker(
-        context: Context, 
-        params: WorkerParameters
-    ) : Worker(context, params) {
-        
-        override fun doWork(): Result {
-            try {
-                Log.d("EmailProcessingWorker", "Starting email processing job")
-                
-                val gmailService = GmailService(applicationContext)
-                val telegramService = TelegramService(applicationContext)
-                val model = MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false)
-                
-                // Check if services are configured properly
-                if (!gmailService.isSignedIn() || !telegramService.isLoggedIn()) {
-                    Log.w("EmailProcessingWorker", "Services not configured properly")
-                    return Result.retry() // Retry later, user might sign in
-                }
-                
-                val pipeline = GmailToTelegramPipeline(
-                    context = applicationContext,
-                    telegramService = telegramService,
-                    model = model,
-                    gmailService = gmailService
-                )
-                
-                // Use coroutine scope to handle async operations
-                val processed = runBlocking {
-                    try {
-                        // Get unread emails (limit to 5 to avoid processing too many at once)
-                        val emails = gmailService.getUnreadEmails(3)
-                        var processedCount = 0
-                        
-                        // Process each email sequentially
-                        for (email in emails) {
-                            Log.d("EmailProcessingWorker", "Processing email: '${email.subject}' from '${email.from}' dated '${email.date}'")
-                            
-                            // Process email and wait for completion using suspending approach
-                            var processingComplete = false
-                            var processingSuccess = false
-                            var processingMessage = ""
-                            
-                            pipeline.setCompletionListener(object : GmailToTelegramPipeline.PipelineCompletionListener {
-                                override fun onComplete(success: Boolean, message: String) {
-                                    processingComplete = true
-                                    processingSuccess = success
-                                    processingMessage = message
-                                }
-                            })
-                            
-                            pipeline.processEmail(email.subject, email.content, telegramService, email.from, email.date)
-                            
-                            // Wait for completion with timeout
-                            var timeoutCounter = 0
-                            while (!processingComplete && timeoutCounter < 60) { // 60 second timeout
-                                delay(1000)
-                                timeoutCounter++
-                            }
-                            
-                            if (!processingComplete) {
-                                Log.w("EmailProcessingWorker", "Processing timed out for email: ${email.subject}")
-                                continue
-                            }
-                            
-                            if (processingSuccess) {
-                                // Mark as read after successful processing
-                                gmailService.markAsRead(email.id)
-                                processedCount++
-                                Log.d("EmailProcessingWorker", "Successfully processed email: ${email.subject}")
-                            } else {
-                                Log.e("EmailProcessingWorker", "Failed to process email: $processingMessage")
-                            }
-                            
-                            // Add delay to avoid rate limiting
-                            delay(2000)
-                        }
-                        
-                        if (processedCount > 0) {
-                            Log.i("EmailProcessingWorker", "Processed $processedCount emails")
-                        } else {
-                            Log.i("EmailProcessingWorker", "No emails processed")
-                        }
-                        
-                        processedCount > 0
-                    } catch (e: Exception) {
-                        Log.e("EmailProcessingWorker", "Error processing emails", e)
-                        false
-                    }
-                }
-                
-                return if (processed) Result.success() else Result.retry()
-            } catch (e: Exception) {
-                Log.e("EmailProcessingWorker", "Worker execution failed", e)
-                return Result.failure()
-            }
-        }
+    /**
+     * Schedule periodic processing
+     */
+    fun schedulePeriodicProcessing(intervalMinutes: Long = 15) {
+        pipeline.schedulePeriodicProcessing(intervalMinutes)
     }
+    
+    /**
+     * For demonstration purposes - process a sample email
+     */
+    fun processSampleEmail(onComplete: ((Boolean, String) -> Unit)? = null) {
+        // Set a temporary completion callback if provided
+        if (onComplete != null) {
+            pipeline.setCompletionCallback(object : EmailProcessingPipeline.CompletionCallback {
+                override fun onComplete(success: Boolean, message: String) {
+                    onComplete(success, message)
+                }
+            })
+        }
+        
+        // Process the sample email
+        pipeline.processSampleEmail()
+    }
+    
+    /**
+     * Get the email fetch service from the underlying pipeline
+     * This is needed for configuring search parameters
+     */
+    fun getEmailFetchService(): EmailFetchService {
+        return pipeline.getEmailFetchService()
+    }
+        
 }

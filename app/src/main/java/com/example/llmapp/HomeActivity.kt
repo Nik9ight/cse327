@@ -44,6 +44,30 @@ class HomeActivity : ComponentActivity() {
         signInButton.setOnClickListener {
             login.signIn()
         }
+        
+        enablePermissionsButton.setOnClickListener {
+            if (!permissions.hasPermissions(requiredPermissions)) {
+                permissions.requestPermissions(requiredPermissions, RC_PERMISSIONS)
+            } else {
+                Toast.makeText(this, "All permissions already granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        telegramSetupButton.setOnClickListener {
+            startActivity(Intent(this, TelegramLoginActivity::class.java))
+        }
+        
+        pipelineButton.setOnClickListener {
+            startActivity(Intent(this, PipelineActivity::class.java))
+        }
+        
+        m1Button.setOnClickListener {
+            startActivity(Intent(this, M1Activity::class.java))
+        }
+        
+        textImageButton.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
 
         enablePermissionsButton.setOnClickListener {
             if (permissions.hasPermissions(requiredPermissions)) {
