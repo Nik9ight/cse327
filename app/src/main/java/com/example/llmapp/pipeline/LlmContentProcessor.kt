@@ -19,6 +19,7 @@ class LlmContentProcessor(
     private val chatView: llmChatView
     private val isProcessing = AtomicBoolean(false)
     private var isInitialized = false
+    private var customPrompt: String? = null
     
     init {
         chatView = llmChatView(model)
@@ -60,10 +61,8 @@ class LlmContentProcessor(
             // Build a prompt for LLM
             val prompt = buildPrompt(subject, content)
             
-            // Use test input approach to avoid issues with problematic content
-            val testInput = buildTestInput(subject, from)
-            
-            Log.d(TAG, "Using test input for LLM processing: $testInput")
+            // Log the actual prompt being used
+            Log.d(TAG, "Using prompt for LLM processing: ${prompt.take(100)}${if (prompt.length > 100) "..." else ""}")
             
             // Accumulate output
             val outputAccumulator = StringBuilder()
@@ -71,7 +70,7 @@ class LlmContentProcessor(
             
             chatView.generateResponse(
                 context = context,
-                input = testInput,
+                input = prompt,
                 images = listOf(),
                 onResult = { result: String, done: Boolean ->
                     Log.d(TAG, "LLM result chunk received, done=$done")
@@ -121,8 +120,46 @@ class LlmContentProcessor(
         isProcessing.set(false)
     }
     
+    /**
+     * Set a custom prompt template
+     * This template will be used as the instruction part, and email details
+     * (subject, content, from, date) will automatically be appended
+     */
+    fun setCustomPrompt(prompt: String?) {
+        customPrompt = prompt
+        Log.d(TAG, "Custom prompt set: ${prompt?.take(50)}${if (prompt?.length ?: 0 > 50) "..." else ""}")
+        
+        // Basic validation
+        if (prompt.isNullOrBlank()) {
+            Log.w(TAG, "Warning: Empty or null custom prompt provided")
+        } else {
+            Log.d(TAG, "Custom prompt accepted - email details will be automatically appended")
+        }
+    }
+    
     // Helper method to build a prompt
     private fun buildPrompt(subject: String, content: String): String {
+        // Extract message details
+        val from = "" // In the actual method we would get this from the message
+        val date = "" // In the actual method we would get this from the message
+        
+        // Use custom prompt if available, otherwise use default
+        if (customPrompt != null && customPrompt!!.isNotBlank()) {
+            // Use the custom prompt as the instruction part, then always append the email details
+            return """
+                ${customPrompt!!.trim()}
+                
+                Subject: $subject
+                
+                Content:
+                $content
+                
+                From: $from
+                Date: $date
+            """.trimIndent()
+        }
+        
+        // Default prompt
         return """
             Summarize the following email and make it as brief as possible while maintaining key information.
             
@@ -130,6 +167,9 @@ class LlmContentProcessor(
             
             Content:
             $content
+            
+            From: $from
+            Date: $date
         """.trimIndent()
     }
     

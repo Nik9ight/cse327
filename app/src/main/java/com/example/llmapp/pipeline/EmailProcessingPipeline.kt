@@ -38,6 +38,12 @@ class EmailProcessingPipeline(
      */
     fun getEmailFetchService(): EmailFetchService = emailFetchService
     
+    /**
+     * Get the content processor instance
+     * This is needed for configuring LLM prompt
+     */
+    fun getContentProcessor(): ContentProcessor = contentProcessor
+    
     // Event management
     private val eventManager = PipelineEventManager()
     

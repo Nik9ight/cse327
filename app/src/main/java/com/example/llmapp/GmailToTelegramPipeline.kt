@@ -184,5 +184,13 @@ fun process() {
     fun getEmailFetchService(): EmailFetchService {
         return pipeline.getEmailFetchService()
     }
+    
+    /**
+     * Get the content processor from the underlying pipeline
+     * This is needed for configuring LLM prompts
+     */
+    fun getContentProcessor(): ContentProcessor {
+        return pipeline.getContentProcessor()
+    }
         
 }

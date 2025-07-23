@@ -138,7 +138,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
     
-    <!-- Step 3: Telegram Setup -->
+    <!-- Step 3: LLM Prompt Configuration -->
     <androidx.cardview.widget.CardView
         android:id="@+id/step3Card"
         android:layout_width="match_parent"
@@ -155,7 +155,53 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 3: Configure Telegram"
+                android:text="Step 3: Configure LLM Prompt"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp" />
+                
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Customize the prompt used by the LLM to process your emails"
+                android:layout_marginBottom="8dp" />
+                
+            <Button
+                android:id="@+id/llmPromptButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set LLM Prompt"
+                android:enabled="false" />
+                
+            <TextView
+                android:id="@+id/step3StatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status: Complete Step 1 first"
+                android:textColor="#757575"
+                android:textStyle="italic"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+    
+    <!-- Step 4: Telegram Setup -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/step4Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:alpha="0.5">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Step 4: Configure Telegram"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp" />
@@ -174,19 +220,19 @@
                 android:enabled="false" />
                 
             <TextView
-                android:id="@+id/step3StatusText"
+                android:id="@+id/step4StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Status: Complete Step 2 first"
+                android:text="Status: Complete Step 1 first"
                 android:textColor="#757575"
                 android:textStyle="italic"
                 android:layout_marginTop="8dp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
     
-    <!-- Step 4: Run Workflow -->
+    <!-- Step 5: Run Workflow -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/step4Card"
+        android:id="@+id/step5Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -201,7 +247,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 4: Run Workflow"
+                android:text="Step 5: Run Workflow"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp" />
@@ -220,10 +266,10 @@
                 android:enabled="false" />
                 
             <TextView
-                android:id="@+id/step4StatusText"
+                android:id="@+id/step5StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Status: Complete Step 3 first"
+                android:text="Status: Complete previous steps first"
                 android:textColor="#757575"
                 android:textStyle="italic"
                 android:layout_marginTop="8dp" />
