@@ -52,15 +52,20 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     private lateinit var searchQueryButton: Button
     private lateinit var step2StatusText: TextView
     
-    // Step 3
+    // Step 3: LLM Prompt Setup
     private lateinit var step3Card: View
-    private lateinit var telegramSetupButton: Button
+    private lateinit var llmPromptButton: Button
     private lateinit var step3StatusText: TextView
     
-    // Step 4
+    // Step 4: Telegram Setup (shifted)
     private lateinit var step4Card: View
-    private lateinit var runWorkflowButton: Button
+    private lateinit var telegramSetupButton: Button
     private lateinit var step4StatusText: TextView
+    
+    // Step 5: Run Workflow (shifted)
+    private lateinit var step5Card: View
+    private lateinit var runWorkflowButton: Button
+    private lateinit var step5StatusText: TextView
     private lateinit var autoProcessSwitch: Switch
     
     // Advanced options
@@ -72,12 +77,15 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     private var step1Completed = false
     private var step2Completed = false
     private var step3Completed = false
+    private var step4Completed = false
     private var currentSearchQuery: String? = null
+    private var currentLlmPrompt: String? = null
     
     // Constants
     private val REQUEST_GMAIL_SIGN_IN = 1001
     private val REQUEST_TELEGRAM_SETUP = 1002
     private val REQUEST_SEARCH_QUERY = 1003
+    private val REQUEST_LLM_PROMPT = 1004
     private val TAG = "PipelineActivity"
     
     /**
@@ -99,15 +107,20 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
         searchQueryButton = findViewById(R.id.searchQueryButton)
         step2StatusText = findViewById(R.id.step2StatusText)
         
-        // Step 3: Telegram Setup
+        // Step 3: LLM Prompt Setup
         step3Card = findViewById(R.id.step3Card)
-        telegramSetupButton = findViewById(R.id.telegramSetupButton)
+        llmPromptButton = findViewById(R.id.llmPromptButton)
         step3StatusText = findViewById(R.id.step3StatusText)
         
-        // Step 4: Run Workflow
+        // Step 4: Telegram Setup
         step4Card = findViewById(R.id.step4Card)
-        runWorkflowButton = findViewById(R.id.runWorkflowButton)
+        telegramSetupButton = findViewById(R.id.telegramSetupButton)
         step4StatusText = findViewById(R.id.step4StatusText)
+        
+        // Step 5: Run Workflow
+        step5Card = findViewById(R.id.step5Card)
+        runWorkflowButton = findViewById(R.id.runWorkflowButton)
+        step5StatusText = findViewById(R.id.step5StatusText)
         autoProcessSwitch = findViewById(R.id.autoProcessSwitch)
         
         // Advanced options
@@ -133,12 +146,17 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
             startSearchQueryActivity()
         }
         
-        // Step 3: Telegram Setup
+        // Step 3: LLM Prompt Setup
+        llmPromptButton.setOnClickListener {
+            startLlmPromptActivity()
+        }
+        
+        // Step 4: Telegram Setup
         telegramSetupButton.setOnClickListener {
             startTelegramSetup()
         }
         
-        // Step 4: Run Workflow
+        // Step 5: Run Workflow
         runWorkflowButton.setOnClickListener {
             runWorkflow()
         }
@@ -215,7 +233,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
 
             // Check Telegram setup
             if (telegramService.isLoggedIn()) {
-                completeStep3()
+                completeStep4()
             }
 
             // Update UI based on current state
@@ -249,11 +267,31 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
      */
     private fun startSearchQueryActivity() {
         val intent = Intent(this, EmailSearchActivity::class.java)
+        
+        // Pass the current query if one exists
+        if (currentSearchQuery != null) {
+            intent.putExtra("current_query", currentSearchQuery)
+        }
+        
         startActivityForResult(intent, REQUEST_SEARCH_QUERY)
     }
     
     /**
-     * Start Telegram Setup (Step 3)
+     * Start LLM Prompt Setup activity (Step 3)
+     */
+    private fun startLlmPromptActivity() {
+        val intent = Intent(this, LlmPromptActivity::class.java)
+        
+        // Pass the current prompt if one exists
+        if (currentLlmPrompt != null) {
+            intent.putExtra("current_prompt", currentLlmPrompt)
+        }
+        
+        startActivityForResult(intent, REQUEST_LLM_PROMPT)
+    }
+    
+    /**
+     * Start Telegram Setup (Step 4)
      */
     private fun startTelegramSetup() {
         val intent = Intent(this, TelegramLoginActivity::class.java)
@@ -261,7 +299,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     }
     
     /**
-     * Run the workflow with current configuration (Step 4)
+     * Run the workflow with current configuration (Step 5)
      */
     private fun runWorkflow() {
         if (!validateWorkflowReadiness()) {
@@ -276,6 +314,13 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
         val fetchService = (pipeline.getEmailFetchService() as? GmailFetchService)
         fetchService?.getSearchQuery()?.let {
             statusTextView.text = "Running workflow with query: $it"
+        }
+        
+        // Apply custom LLM prompt if exists
+        if (currentLlmPrompt != null && currentLlmPrompt!!.isNotBlank()) {
+            val contentProcessor = pipeline.getContentProcessor() as? LlmContentProcessor
+            contentProcessor?.setCustomPrompt(currentLlmPrompt)
+            Log.d(TAG, "Applied custom LLM prompt")
         }
         
         // Run the pipeline
@@ -333,11 +378,22 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     }
     
     /**
-     * Mark step 3 as completed
+     * Mark step 3 as completed (LLM Prompt)
      */
-    private fun completeStep3() {
+    private fun completeStep3(prompt: String?) {
         step3Completed = true
-        step3StatusText.text = "Telegram bot configured"
+        currentLlmPrompt = prompt
+        val displayPrompt = if (prompt.isNullOrBlank()) "Default prompt" else "Custom prompt"
+        step3StatusText.text = "LLM Prompt: $displayPrompt"
+        llmPromptButton.text = "Change LLM Prompt"
+    }
+    
+    /**
+     * Mark step 4 as completed (Telegram)
+     */
+    private fun completeStep4() {
+        step4Completed = true
+        step4StatusText.text = "Telegram bot configured"
         telegramSetupButton.text = "Re-configure Telegram"
     }
     
@@ -353,20 +409,28 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
             "Complete Step 1 first" else 
             step2StatusText.text
             
-        // Step 3 availability
+        // Step 3 availability (LLM Prompt)
         step3Card.alpha = if (step1Completed) 1.0f else 0.5f
-        telegramSetupButton.isEnabled = step1Completed
+        llmPromptButton.isEnabled = step1Completed
         step3StatusText.text = if (step1Completed && !step3Completed) 
-            "Ready to configure Telegram" else if (!step1Completed) 
+            "Ready to set LLM prompt" else if (!step1Completed) 
             "Complete Step 1 first" else 
             step3StatusText.text
             
-        // Step 4 availability
-        val step4Ready = step1Completed && step3Completed // Step 2 is optional
-        step4Card.alpha = if (step4Ready) 1.0f else 0.5f
-        runWorkflowButton.isEnabled = step4Ready
-        autoProcessSwitch.isEnabled = step4Ready
-        step4StatusText.text = if (step4Ready) 
+        // Step 4 availability (Telegram Setup)
+        step4Card.alpha = if (step1Completed) 1.0f else 0.5f
+        telegramSetupButton.isEnabled = step1Completed
+        step4StatusText.text = if (step1Completed && !step4Completed) 
+            "Ready to configure Telegram" else if (!step1Completed) 
+            "Complete Step 1 first" else 
+            step4StatusText.text
+            
+        // Step 5 availability (Run Workflow)
+        val step5Ready = step1Completed && step4Completed // Step 2 and 3 are optional
+        step5Card.alpha = if (step5Ready) 1.0f else 0.5f
+        runWorkflowButton.isEnabled = step5Ready
+        autoProcessSwitch.isEnabled = step5Ready
+        step5StatusText.text = if (step5Ready) 
             "Ready to run workflow" else 
             "Complete previous steps first"
     }
@@ -380,7 +444,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
             return false
         }
         
-        if (!step3Completed) {
+        if (!step4Completed) {
             Toast.makeText(this, "Please configure Telegram first", Toast.LENGTH_SHORT).show()
             return false
         }
@@ -535,9 +599,28 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
                     Log.d(TAG, "Search query selection cancelled")
                 }
             }
+            REQUEST_LLM_PROMPT -> {
+                if (resultCode == Activity.RESULT_OK && data != null) {
+                    val prompt = data.getStringExtra("llm_prompt")
+                    currentLlmPrompt = prompt
+
+                    // Store the prompt in the content processor
+                    val contentProcessor = pipeline.getContentProcessor() as? LlmContentProcessor
+                    contentProcessor?.setCustomPrompt(prompt)
+
+                    // Mark step 3 as completed
+                    completeStep3(prompt)
+                    updateWorkflowUI()
+
+                    Toast.makeText(this, "LLM prompt updated", Toast.LENGTH_SHORT).show()
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    // User cancelled - no changes needed
+                    Log.d(TAG, "LLM prompt selection cancelled")
+                }
+            }
             REQUEST_TELEGRAM_SETUP -> {
                 if (resultCode == RESULT_OK) {
-                    completeStep3()
+                    completeStep4()
                     updateWorkflowUI()
                 }
             }
@@ -556,8 +639,8 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
                 }
 
                 // Check Telegram setup
-                if (telegramService.isLoggedIn() && !step3Completed) {
-                    completeStep3()
+                if (telegramService.isLoggedIn() && !step4Completed) {
+                    completeStep4()
                 }
 
                 // Update UI based on current state

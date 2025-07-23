@@ -41,6 +41,10 @@
             android:name=".EmailSearchActivity"
             android:label="Email Search"
             android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".LlmPromptActivity"
+            android:label="LLM Prompt Configuration"
+            android:parentActivityName=".PipelineActivity" />
     </application>
 
 </manifest>
