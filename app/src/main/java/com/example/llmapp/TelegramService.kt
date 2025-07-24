@@ -124,6 +124,16 @@ class TelegramService(private val context: Context) {
         return isLoggedIn
     }
 
+    // Get bot token
+    fun getBotToken(): String? {
+        return botToken
+    }
+
+    // Get chat ID
+    fun getChatId(): String? {
+        return chatId
+    }
+
     // Send message to chat
     fun sendMessage(text: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         if (!isLoggedIn) {

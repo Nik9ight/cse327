@@ -73,9 +73,15 @@ object GmailDebug {
             Scope(GmailScopes.GMAIL_MODIFY)
         )
         
+        val hasSendScope = GoogleSignIn.hasPermissions(
+            account,
+            Scope(GmailScopes.GMAIL_SEND)
+        )
+        
         val message = "Signed in as: ${account.email}\n" +
                       "Read scope: ${if (hasReadScope) "✅" else "❌"}\n" +
-                      "Modify scope: ${if (hasModifyScope) "✅" else "❌"}"
+                      "Modify scope: ${if (hasModifyScope) "✅" else "❌"}\n" +
+                      "Send scope: ${if (hasSendScope) "✅" else "❌"}"
                       
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }

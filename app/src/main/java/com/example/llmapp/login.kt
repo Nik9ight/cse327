@@ -25,6 +25,7 @@ class Login(private val activity: Activity) {
             gsoBuilder
                 .requestScopes(Scope(GmailScopes.GMAIL_READONLY))
                 .requestScopes(Scope(GmailScopes.GMAIL_MODIFY))
+                .requestScopes(Scope(GmailScopes.GMAIL_SEND))
         }
         
         val gso = gsoBuilder.build()
@@ -79,9 +80,10 @@ class Login(private val activity: Activity) {
     // Check if the user has granted the requested Gmail scopes
     fun hasGmailScopes(): Boolean {
         val account = GoogleSignIn.getLastSignedInAccount(activity)
-        return account != null && 
+        return account != null &&
                GoogleSignIn.hasPermissions(account, Scope(GmailScopes.GMAIL_READONLY)) &&
-               GoogleSignIn.hasPermissions(account, Scope(GmailScopes.GMAIL_MODIFY))
+               GoogleSignIn.hasPermissions(account, Scope(GmailScopes.GMAIL_MODIFY)) &&
+               GoogleSignIn.hasPermissions(account, Scope(GmailScopes.GMAIL_SEND))
     }
     
     // Get the constant to identify the sign-in request

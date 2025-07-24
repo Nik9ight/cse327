@@ -38,6 +38,7 @@ class HomeActivity : ComponentActivity() {
         val enablePermissionsButton = findViewById<Button>(R.id.enablePermissionsButton)
         val telegramSetupButton = findViewById<Button>(R.id.telegramSetupButton)
         val pipelineButton = findViewById<Button>(R.id.pipelineButton)
+        val telegramToGmailButton = findViewById<Button>(R.id.telegramToGmailButton)
         m1Button = findViewById(R.id.m1Button)
         val textImageButton = findViewById<Button>(R.id.textImageButton)
 
@@ -61,40 +62,16 @@ class HomeActivity : ComponentActivity() {
             startActivity(Intent(this, PipelineActivity::class.java))
         }
         
+        telegramToGmailButton.setOnClickListener {
+            startActivity(Intent(this, TelegramToGmailActivity::class.java))
+        }
+        
         m1Button.setOnClickListener {
             startActivity(Intent(this, M1Activity::class.java))
         }
         
         textImageButton.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
-        }
-
-        enablePermissionsButton.setOnClickListener {
-            if (permissions.hasPermissions(requiredPermissions)) {
-                Toast.makeText(this, "All permissions already granted", Toast.LENGTH_SHORT).show()
-            } else {
-                permissions.requestPermissions(requiredPermissions, RC_PERMISSIONS)
-            }
-        }
-
-        telegramSetupButton.setOnClickListener {
-            val intent = Intent(this, TelegramLoginActivity::class.java)
-            startActivity(intent)
-        }
-
-        pipelineButton.setOnClickListener {
-            val intent = Intent(this, PipelineActivity::class.java)
-            startActivity(intent)
-        }
-
-        m1Button.setOnClickListener {
-            val intent = Intent(this, M1Activity::class.java)
-            startActivity(intent)
-        }
-
-        textImageButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
         }
     }
 

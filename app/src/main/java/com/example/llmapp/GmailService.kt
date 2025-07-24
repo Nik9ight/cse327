@@ -23,6 +23,7 @@ import java.util.Collections
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.*
 
 private const val TAG = "GmailService"
 
@@ -38,7 +39,7 @@ class GmailService(private val context: Context, private val serviceAccount: Str
     }
     
     // Search for emails with a specific query
-    suspend fun searchEmails(query: String, maxResults: Int = 10): List<Message> = suspendCoroutine { continuation ->
+    suspend fun searchEmails(query: String, maxResults: Int = 10): List<Message> = withContext(Dispatchers.IO) {
         try {
             val user = "me"
             val request = gmailClient?.users()?.messages()?.list(user)?.setQ(query)?.setMaxResults(maxResults.toLong())
@@ -48,10 +49,10 @@ class GmailService(private val context: Context, private val serviceAccount: Str
                 gmailClient?.users()?.messages()?.get(user, message.id)?.execute()
             } ?: listOf()
             
-            continuation.resume(messages)
+            messages
         } catch (e: Exception) {
             Log.e(TAG, "Error searching emails: ${e.message}")
-            continuation.resumeWithException(e)
+            throw e
         }
     }
     
@@ -109,7 +110,8 @@ class GmailService(private val context: Context, private val serviceAccount: Str
             if (GoogleSignIn.hasPermissions(
                 account,
                 Scope(GmailScopes.GMAIL_READONLY),
-                Scope(GmailScopes.GMAIL_MODIFY)
+                Scope(GmailScopes.GMAIL_MODIFY),
+                Scope(GmailScopes.GMAIL_SEND)
             )) {
                 Log.d(TAG, "User already signed in with required scopes")
                 setupGmailClient(account)
@@ -213,7 +215,7 @@ class GmailService(private val context: Context, private val serviceAccount: Str
             
             val credential = GoogleAccountCredential.usingOAuth2(
                 context,
-                listOf(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_MODIFY)
+                listOf(GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_MODIFY, GmailScopes.GMAIL_SEND)
             )
             credential.selectedAccount = account.account
             
@@ -359,88 +361,143 @@ class GmailService(private val context: Context, private val serviceAccount: Str
     }
     
     // Get unread emails from Gmail, sorted by most recent first
-    suspend fun getUnreadEmails(maxResults: Int = 10): List<EmailMessage> = suspendCoroutine { continuation ->
+    suspend fun getUnreadEmails(maxResults: Int = 10): List<EmailMessage> = withContext(Dispatchers.IO) {
         if (!isSignedIn()) {
-            continuation.resumeWithException(IllegalStateException("Not signed in to Gmail"))
-            return@suspendCoroutine
+            throw IllegalStateException("Not signed in to Gmail")
         }
         
-        Thread {
-            try {
-                val userId = "me"
-                val listResponse: ListMessagesResponse = gmailClient!!.users().messages()
-                    .list(userId)
-                    .setMaxResults(maxResults.toLong())
-                    .setQ("is:unread")  // Only unread emails
-                    .execute()
-                
-                // Process and map messages
-                var messages = listResponse.messages?.mapNotNull { messageRef ->
-                    try {
-                        val message = gmailClient!!.users().messages().get(userId, messageRef.id).execute()
-                        val headers = message.payload.headers
-                        
-                        val from = headers.find { it.name == "From" }?.value ?: ""
-                        val subject = headers.find { it.name == "Subject" }?.value ?: ""
-                        val content = extractEmailContent(message)
-                        val date = headers.find { it.name == "Date" }?.value ?: ""
-                        
-                        // Use internal date (timestamp) for sorting
-                        val internalDate = message.internalDate ?: 0L
-                        
-                        Log.d(TAG, "Processing email: '$subject' from '$from' dated '$date'")
-                        
-                        EmailMessage(
-                            id = message.id,
-                            from = from,
-                            subject = subject,
-                            content = content,
-                            date = date,
-                            timestamp = internalDate
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error processing message ${messageRef.id}", e)
-                        null
-                    }
-                } ?: listOf()
-                
-                // Sort messages by timestamp (newest first)
-                messages = messages.sortedByDescending { it.timestamp }
-                
-                // Log the number of emails fetched
-                Log.d(TAG, "Fetched ${messages.size} unread emails, sorted by newest first")
-                
-                continuation.resume(messages)
-            } catch (e: IOException) {
-                Log.e(TAG, "Error fetching emails", e)
-                continuation.resumeWithException(e)
-            } catch (e: Exception) {
-                Log.e(TAG, "Unexpected error", e)
-                continuation.resumeWithException(e)
-            }
-        }.start()
+        try {
+            val userId = "me"
+            val listResponse: ListMessagesResponse = gmailClient!!.users().messages()
+                .list(userId)
+                .setMaxResults(maxResults.toLong())
+                .setQ("is:unread")  // Only unread emails
+                .execute()
+            
+            // Process and map messages
+            var messages = listResponse.messages?.mapNotNull { messageRef ->
+                try {
+                    val message = gmailClient!!.users().messages().get(userId, messageRef.id).execute()
+                    val headers = message.payload.headers
+                    
+                    val from = headers.find { it.name == "From" }?.value ?: ""
+                    val subject = headers.find { it.name == "Subject" }?.value ?: ""
+                    val content = extractEmailContent(message)
+                    val date = headers.find { it.name == "Date" }?.value ?: ""
+                    
+                    // Use internal date (timestamp) for sorting
+                    val internalDate = message.internalDate ?: 0L
+                    
+                    Log.d(TAG, "Processing email: '$subject' from '$from' dated '$date'")
+                    
+                    EmailMessage(
+                        id = message.id,
+                        from = from,
+                        subject = subject,
+                        content = content,
+                        date = date,
+                        timestamp = internalDate
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error processing message ${messageRef.id}", e)
+                    null
+                }
+            } ?: listOf()
+            
+            // Sort messages by timestamp (newest first)
+            messages = messages.sortedByDescending { it.timestamp }
+            
+            // Log the number of emails fetched
+            Log.d(TAG, "Fetched ${messages.size} unread emails, sorted by newest first")
+            
+            messages
+        } catch (e: IOException) {
+            Log.e(TAG, "Error fetching emails", e)
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error", e)
+            throw e
+        }
     }
     
     // Mark an email as read (remove UNREAD label)
-    suspend fun markAsRead(messageId: String): Boolean = suspendCoroutine { continuation ->
+    suspend fun markAsRead(messageId: String): Boolean = withContext(Dispatchers.IO) {
         if (!isSignedIn()) {
-            continuation.resumeWithException(IllegalStateException("Not signed in to Gmail"))
-            return@suspendCoroutine
+            throw IllegalStateException("Not signed in to Gmail")
         }
         
-        Thread {
-            try {
-                val modifyMessageRequest = ModifyMessageRequest()
-                modifyMessageRequest.removeLabelIds = listOf("UNREAD")
-                gmailClient!!.users().messages()
-                    .modify("me", messageId, modifyMessageRequest)
-                    .execute()
-                continuation.resume(true)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error marking email as read", e)
-                continuation.resumeWithException(e)
-            }
-        }.start()
+        try {
+            val modifyMessageRequest = ModifyMessageRequest()
+            modifyMessageRequest.removeLabelIds = listOf("UNREAD")
+            gmailClient!!.users().messages()
+                .modify("me", messageId, modifyMessageRequest)
+                .execute()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error marking email as read", e)
+            throw e
+        }
+    }
+    
+    // Send an email through Gmail
+    suspend fun sendEmail(
+        to: List<String>,
+        subject: String,
+        body: String,
+        isHtml: Boolean = true,
+        from: String? = null
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (!isSignedIn()) {
+            throw IllegalStateException("Not signed in to Gmail")
+        }
+        
+        try {
+            Log.d(TAG, "Sending email to: ${to.joinToString(", ")}")
+            Log.d(TAG, "Subject: $subject")
+            
+            // Build email content
+            val fromAddress = from ?: GoogleSignIn.getLastSignedInAccount(context)?.email ?: "me"
+            val rawEmail = buildEmailMessage(to, fromAddress, subject, body, isHtml)
+            
+            // Create Gmail message
+            val message = com.google.api.services.gmail.model.Message()
+            message.raw = java.util.Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(rawEmail.toByteArray())
+            
+            // Send the email
+            val result = gmailClient!!.users().messages()
+                .send("me", message)
+                .execute()
+            
+            Log.d(TAG, "Email sent successfully with ID: ${result.id}")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending email", e)
+            throw e
+        }
+    }
+    
+    // Helper method to build RFC 2822 compliant email message
+    private fun buildEmailMessage(
+        to: List<String>,
+        from: String,
+        subject: String,
+        body: String,
+        isHtml: Boolean
+    ): String {
+        val contentType = if (isHtml) "text/html; charset=UTF-8" else "text/plain; charset=UTF-8"
+        
+        return buildString {
+            appendLine("From: $from")
+            appendLine("To: ${to.joinToString(", ")}")
+            appendLine("Subject: $subject")
+            appendLine("Content-Type: $contentType")
+            appendLine("MIME-Version: 1.0")
+            appendLine()
+            append(body)
+        }
     }
     
     // Extract content from Gmail message

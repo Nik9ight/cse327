@@ -7,29 +7,38 @@ import com.example.llmapp.patterns.BroadcastPipelineObserver
 import com.example.llmapp.patterns.PipelineObserver
 
 /**
- * GmailToTelegramPipeline - Refactored to use design patterns with modular architecture
+ * GmailToTelegramPipeline - Enhanced with comprehensive design patterns
  * 
  * This is a facade class that provides backward compatibility with the existing
  * codebase while delegating actual work to the new modular pipeline components.
  * 
- * Uses:
- * - Strategy Pattern: For different processing strategies
- * - Command Pattern: For email processing commands 
- * - Observer Pattern: For notifications
+ * Design Patterns Implemented:
+ * - Strategy Pattern: For different processing strategies and service creation
+ * - Command Pattern: For email processing commands with undo/redo support
+ * - Observer Pattern: For notifications and event handling
  * - Chain of Responsibility: For email processing pipeline
  * - Factory Pattern: For creating service components
+ * - Template Method Pattern: For customizable processing workflows
+ * - Plugin Architecture: For extensible functionality
  */
 class GmailToTelegramPipeline(
     private val context: Context,
     private val telegramService: TelegramService? = null,
     private val model: Model? = MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false),
-    private val gmailService: GmailService? = null
+    private val gmailService: GmailService? = null,
+    private val serviceCreationStrategy: ServiceCreationStrategy = DefaultServiceStrategy()
 ) {
     private val TAG = "GmailToTelegramPipeline"
     private var completionListener: PipelineCompletionListener? = null
     
     // The new pipeline implementation
     private val pipeline: EmailProcessingPipeline
+    
+    // Command pattern support
+    private val commandInvoker = PipelineCommandInvoker()
+    
+    // Template method pattern support
+    private val processingTemplate: EmailProcessingTemplate
     
     // Observer pattern support for backward compatibility
     private val observers = mutableListOf<PipelineObserver>()
@@ -43,10 +52,10 @@ class GmailToTelegramPipeline(
     }
     
     init {
-        // Create the services
-        val emailFetchService = GmailFetchService(context, gmailService)
-        val contentProcessor = LlmContentProcessor(context, model ?: MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false))
-        val deliveryService = TelegramDeliveryService(context, telegramService)
+        // Use strategy pattern for service creation
+        val emailFetchService = serviceCreationStrategy.createEmailFetchService(context, gmailService)
+        val contentProcessor = serviceCreationStrategy.createContentProcessor(context, model)
+        val deliveryService = serviceCreationStrategy.createDeliveryService(context, telegramService)
         
         // Create the pipeline with the services
         pipeline = EmailProcessingPipeline(
@@ -56,13 +65,36 @@ class GmailToTelegramPipeline(
             deliveryService = deliveryService
         )
         
+        // Create processing template for template method pattern
+        processingTemplate = PipelineTemplateFactory.createTelegramTemplate(
+            promptStrategy = DefaultPromptStrategy(),
+            telegramService = telegramService ?: TelegramService(context)
+        )
+        
         // Add legacy observer support
         addObserver(BroadcastPipelineObserver(context))
         
-        Log.d(TAG, "GmailToTelegramPipeline facade initialized")
+        Log.d(TAG, "GmailToTelegramPipeline facade initialized with enhanced design patterns")
     }
     
-    constructor(context: Context) : this(context, null, MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false), null)
+    constructor(context: Context) : this(
+        context, 
+        null, 
+        MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false), 
+        null,
+        DefaultServiceStrategy()
+    )
+    
+    /**
+     * Alternative constructor with custom strategy
+     */
+    constructor(context: Context, strategy: ServiceCreationStrategy) : this(
+        context, 
+        null, 
+        MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false), 
+        null,
+        strategy
+    )
     
     /**
      * Set a completion listener to be notified when processing is complete
@@ -97,36 +129,62 @@ class GmailToTelegramPipeline(
     
     /**
      * Process unread messages from Gmail and send them to Telegram
-     * Legacy method that delegates to the new pipeline
+     * Enhanced with Command Pattern support
      */
-    // fun process() {
-    //     pipeline.processEmailsWithSearch(query: String, 3)
-    // }
-    /**
- * Process unread messages from Gmail and send them to Telegram
- * Legacy method that delegates to the new pipeline
- */
-fun process() {
-    // Get the search query if set, otherwise use default processing
-    val fetchService = getEmailFetchService() as? GmailFetchService
-    val query = fetchService?.getSearchQuery()
-    
-    if (query != null && query.isNotBlank()) {
-        Log.d(TAG, "Processing with search query: $query")
-        pipeline.processEmailsWithSearch(query, 3)
-    } else {
-        Log.d(TAG, "Processing with default settings (unread emails)")
-        pipeline.processEmails(3)
+    fun process() {
+        // Get the search query if set, otherwise use default processing
+        val fetchService = getEmailFetchService() as? GmailFetchService
+        val query = fetchService?.getSearchQuery()
+        
+        // Create and execute command using Command Pattern
+        val command = PipelineCommandFactory.createProcessCommand(pipeline, query, 3)
+        val success = commandInvoker.executeCommand(command)
+        
+        if (success) {
+            Log.d(TAG, "Processing command executed successfully")
+        } else {
+            Log.e(TAG, "Processing command failed")
+        }
     }
-}
+    
+    /**
+     * Undo the last processing operation
+     */
+    fun undoLastOperation(): Boolean {
+        return commandInvoker.undoLastCommand()
+    }
+    
+    /**
+     * Get command history for debugging/audit purposes
+     */
+    fun getCommandHistory(): List<String> {
+        return commandInvoker.getCommandHistory()
+    }
+    
+    /**
+     * Clear command history
+     */
+    fun clearCommandHistory() {
+        commandInvoker.clearHistory()
+    }
+    
+    /**
+     * Process email using Template Method Pattern
+     * This provides a more structured and customizable processing approach
+     */
+    fun processEmailWithTemplate(email: Email): Boolean {
+        return processingTemplate.processEmail(email)
+    }
                     
     // No old code needed here - pipeline handles all processing
     
     /**
      * Process Gmail message and send to Telegram
+     * Enhanced with Command Pattern
      */
     fun processEmail(subject: String, content: String, telegramService: TelegramService? = null, from: String = "", date: String = "") {
-        pipeline.processManualEmail(subject, content, from, date)
+        val command = PipelineCommandFactory.createManualEmailCommand(pipeline, subject, content, from, date)
+        commandInvoker.executeCommand(command)
     }
     
     /**
@@ -138,6 +196,7 @@ fun process() {
     
     /**
      * Method to fetch and process emails from Gmail
+     * Enhanced with Command Pattern
      */
     fun fetchAndProcessEmails(count: Int = 3, onComplete: ((Boolean, String) -> Unit)? = null) {
         // Set a temporary completion callback if provided
@@ -149,8 +208,9 @@ fun process() {
             })
         }
         
-        // Process emails
-        pipeline.processEmails(count)
+        // Create and execute command
+        val command = ProcessEmailsCommand(pipeline, count)
+        commandInvoker.executeCommand(command)
     }
     
     /**
@@ -162,6 +222,7 @@ fun process() {
     
     /**
      * For demonstration purposes - process a sample email
+     * Enhanced with Command Pattern
      */
     fun processSampleEmail(onComplete: ((Boolean, String) -> Unit)? = null) {
         // Set a temporary completion callback if provided
@@ -173,8 +234,9 @@ fun process() {
             })
         }
         
-        // Process the sample email
-        pipeline.processSampleEmail()
+        // Create and execute command
+        val command = PipelineCommandFactory.createSampleEmailCommand(pipeline)
+        commandInvoker.executeCommand(command)
     }
     
     /**
@@ -191,6 +253,42 @@ fun process() {
      */
     fun getContentProcessor(): ContentProcessor {
         return pipeline.getContentProcessor()
+    }
+    
+    /**
+     * Switch to a different service creation strategy at runtime
+     * Demonstrates Strategy Pattern flexibility
+     */
+    fun switchServiceStrategy(newStrategy: ServiceCreationStrategy) {
+        Log.d(TAG, "Switching service creation strategy")
+        // Note: In a real implementation, you might want to recreate the pipeline
+        // with the new strategy. For now, this is just a demonstration.
+        // This would require careful handling of existing state.
+    }
+    
+    /**
+     * Get processing template for advanced customization
+     */
+    fun getProcessingTemplate(): EmailProcessingTemplate {
+        return processingTemplate
+    }
+    
+    /**
+     * Create a custom processing template
+     */
+    fun createCustomTemplate(
+        promptStrategy: PromptStrategy,
+        telegramService: TelegramService
+    ): EmailProcessingTemplate {
+        return PipelineTemplateFactory.createTelegramTemplate(promptStrategy, telegramService)
+    }
+    
+    /**
+     * Get metrics and statistics about command execution
+     */
+    fun getExecutionStats(): String {
+        val history = commandInvoker.getCommandHistory()
+        return "Total commands executed: ${history.size}\nRecent commands: ${history.takeLast(3).joinToString(", ")}"
     }
         
 }

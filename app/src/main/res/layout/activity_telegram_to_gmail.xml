@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:fillViewport="true"
+    android:scrollbars="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Telegram to Gmail Pipeline"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Configuration Steps -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Configuration Steps"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Step 1: Telegram Configuration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Step 1: Configure Telegram Bot"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/step1StatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Telegram Bot"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <Button
+                android:id="@+id/step1Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Telegram" />
+
+        </LinearLayout>
+
+        <!-- Step 2: Email Configuration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Step 2: Configure Email Recipients"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/step2StatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set Email Recipients"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <Button
+                android:id="@+id/step2Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Set Email Recipients" />
+
+        </LinearLayout>
+
+        <!-- Step 3: LLM Prompt Configuration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Step 3: Configure LLM Prompt"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/step3StatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure LLM Prompt"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <Button
+                android:id="@+id/step3Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Prompt" />
+
+        </LinearLayout>
+
+        <!-- Step 4: Gmail Configuration -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Step 4: Configure Gmail Service"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/step4StatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Gmail Service"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <Button
+                android:id="@+id/step4Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Configure Gmail" />
+
+        </LinearLayout>
+
+        <!-- Advanced Options -->
+        <Button
+            android:id="@+id/showAdvancedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Advanced Options"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        <LinearLayout
+            android:id="@+id/advancedOptionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Advanced Configuration"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Email Template -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email Template Type"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <Spinner
+                android:id="@+id/templateSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Batch Size -->
+            <TextView
+                android:id="@+id/batchSizeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Batch Size: 5"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <SeekBar
+                android:id="@+id/batchSizeSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Delay Between Emails -->
+            <TextView
+                android:id="@+id/delayText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Delay: 1000ms"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black" />
+
+            <SeekBar
+                android:id="@+id/delaySeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pipeline Actions"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/runPipelineButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Complete Configuration First"
+            android:layout_marginBottom="8dp"
+            android:enabled="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/testConnectionsButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Test Connections"
+                android:layout_marginEnd="8dp"
+                android:enabled="false"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/clearHistoryButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear History"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <!-- Progress -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Statistics -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Statistics"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/statisticsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No statistics available"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:textColor="@android:color/black" />
+
+        <!-- Log Output -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Activity Log"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/logOutput"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@drawable/card_background"
+            android:padding="12dp"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:text=""
+            android:scrollbars="vertical"
+            android:scrollHorizontally="true"
+            android:maxLines="50"
+            android:gravity="top|start"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+</ScrollView>
