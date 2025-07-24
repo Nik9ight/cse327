@@ -9,17 +9,26 @@ import com.example.llmapp.llmChatView
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Implementation of ContentProcessor using LLM
+ * Implementation of ContentProcessor using LLM with Strategy Pattern support
+ * 
+ * DESIGN PATTERNS IMPLEMENTED:
+ * - Strategy Pattern: For flexible prompt generation (PromptStrategy)
+ * - Template Method: Base processing flow with customizable prompt building
+ * 
+ * EXTENSIBILITY FEATURES:
+ * - Can switch prompt strategies without modifying processor code
+ * - Backward compatible with existing setCustomPrompt method
+ * - Easy to add new prompt types (analysis, classification, etc.)
  */
 class LlmContentProcessor(
     private val context: Context,
-    private val model: Model = MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false)
+    private val model: Model = MODEL_TEXT_CLASSIFICATION_MOBILEBERT.copy(llmSupportImage = false),
+    private var promptStrategy: PromptStrategy = DefaultPromptStrategy()
 ) : ContentProcessor {
     private val TAG = "LlmContentProcessor"
     private val chatView: llmChatView
     private val isProcessing = AtomicBoolean(false)
     private var isInitialized = false
-    private var customPrompt: String? = null
     
     init {
         chatView = llmChatView(model)
@@ -39,7 +48,11 @@ class LlmContentProcessor(
         onComplete: (String) -> Unit,
         onError: (String) -> Unit
     ) {
+        // Log essential information for debugging
+        Log.d(TAG, "Processing request - Subject: ${message.subject.take(30)}... Content size: ${message.content.length} chars")
+        
         if (!isReady()) {
+            Log.w(TAG, "LLM processor not ready - initialized: $isInitialized, processing: ${isProcessing.get()}")
             onError("LLM processor is not ready")
             return
         }
@@ -53,16 +66,12 @@ class LlmContentProcessor(
         try {
             Log.d(TAG, "Processing message: ${message.subject}")
             
-            // Extract message details
-            val subject = sanitizeText(message.subject, 100)
-            val content = sanitizeText(message.content, 5000)
-            val from = sanitizeText(message.metadata["from"] ?: "", 100)
-            
-            // Build a prompt for LLM
-            val prompt = buildPrompt(subject, content)
+            // Build prompt using strategy pattern
+            val prompt = promptStrategy.buildPrompt(message)
             
             // Log the actual prompt being used
             Log.d(TAG, "Using prompt for LLM processing: ${prompt.take(100)}${if (prompt.length > 100) "..." else ""}")
+            Log.d(TAG, "Prompt strategy: ${promptStrategy::class.simpleName}")
             
             // Accumulate output
             val outputAccumulator = StringBuilder()
@@ -92,8 +101,19 @@ class LlmContentProcessor(
                     if (!isCompleted) {
                         isCompleted = true
                         isProcessing.set(false)
+                        
+                        // Enhanced error logging
                         Log.e(TAG, "LLM processing error: $error")
-                        onError("Error processing: $error")
+                        Log.e(TAG, "Input size was: ${prompt.length} characters")
+                        
+                        // Handle %s placeholder error specially
+                        val cleanedError = if (error.contains("%s")) {
+                            "Input too large or format error. Try with a shorter email."
+                        } else {
+                            "Error processing: $error"
+                        }
+                        
+                        onError(cleanedError)
                     }
                 }
             )
@@ -121,67 +141,36 @@ class LlmContentProcessor(
     }
     
     /**
-     * Set a custom prompt template
-     * This template will be used as the instruction part, and email details
-     * (subject, content, from, date) will automatically be appended
+     * Set a new prompt strategy for content processing
+     * This allows changing the prompt generation behavior without modifying the processor
+     */
+    fun setPromptStrategy(strategy: PromptStrategy) {
+        this.promptStrategy = strategy
+        Log.d(TAG, "Prompt strategy changed to: ${strategy::class.simpleName}")
+    }
+    
+    /**
+     * Set a custom prompt template (backward compatibility)
+     * This creates a CustomPromptStrategy internally
      */
     fun setCustomPrompt(prompt: String?) {
-        customPrompt = prompt
-        Log.d(TAG, "Custom prompt set: ${prompt?.take(50)}${if (prompt?.length ?: 0 > 50) "..." else ""}")
-        
-        // Basic validation
         if (prompt.isNullOrBlank()) {
-            Log.w(TAG, "Warning: Empty or null custom prompt provided")
+            Log.w(TAG, "Empty prompt provided, using default strategy")
+            promptStrategy = DefaultPromptStrategy()
         } else {
-            Log.d(TAG, "Custom prompt accepted - email details will be automatically appended")
+            Log.d(TAG, "Custom prompt set: ${prompt.take(50)}${if (prompt.length > 50) "..." else ""}")
+            promptStrategy = CustomPromptStrategy(prompt)
         }
     }
     
-    // Helper method to build a prompt
-    private fun buildPrompt(subject: String, content: String): String {
-        // Extract message details
-        val from = "" // In the actual method we would get this from the message
-        val date = "" // In the actual method we would get this from the message
-        
-        // Use custom prompt if available, otherwise use default
-        if (customPrompt != null && customPrompt!!.isNotBlank()) {
-            // Use the custom prompt as the instruction part, then always append the email details
-            return """
-                ${customPrompt!!.trim()}
-                
-                Subject: $subject
-                
-                Content:
-                $content
-                
-                From: $from
-                Date: $date
-            """.trimIndent()
-        }
-        
-        // Default prompt
-        return """
-            Summarize the following email and make it as brief as possible while maintaining key information.
-            
-            Subject: $subject
-            
-            Content:
-            $content
-            
-            From: $from
-            Date: $date
-        """.trimIndent()
-    }
+    /**
+     * Get the current prompt strategy
+     */
+    fun getPromptStrategy(): PromptStrategy = promptStrategy
     
-    // Helper method to build a test input
-    private fun buildTestInput(subject: String, sender: String): String {
-        return """
-            Summarize the following email from ${sanitizeText(sender, 50)} with subject "${sanitizeText(subject, 50)}".
-            Make it brief and professional.
-        """.trimIndent()
-    }
+    // Removed old buildPrompt method - now handled by strategy pattern
     
-    // Helper method to sanitize text
+    // Helper method to sanitize text (kept for backward compatibility)
     private fun sanitizeText(text: String, maxLength: Int = 8000): String {
         if (text.isEmpty()) return ""
         

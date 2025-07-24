@@ -34,6 +34,13 @@ class TelegramLoginActivity : ComponentActivity() {
         // Check if already logged in
         if (telegramService.isLoggedIn()) {
             testMessageButton.isEnabled = true
+            
+            // Display current saved chat ID if available
+            val savedChatId = telegramService.getChatId()
+            if (!savedChatId.isNullOrEmpty()) {
+                chatIdEditText.setText(savedChatId)
+                android.util.Log.d("TelegramLoginActivity", "Pre-populated chat ID field with saved value: $savedChatId")
+            }
         }
         
         connectBotButton.setOnClickListener {
@@ -78,8 +85,17 @@ class TelegramLoginActivity : ComponentActivity() {
                 onSuccess = {
                     // Save the chat ID only if verification succeeds
                     telegramService.setChatId(chatId)
-                    Toast.makeText(this, "Chat ID verified and saved", Toast.LENGTH_SHORT).show()
-                    updateUI()
+                    
+                    // Verify that the chat ID was actually saved
+                    val savedChatId = telegramService.getChatId()
+                    if (savedChatId == chatId) {
+                        Toast.makeText(this, "Chat ID verified and saved successfully: $chatId", Toast.LENGTH_LONG).show()
+                        android.util.Log.d("TelegramLoginActivity", "Chat ID successfully saved: $chatId")
+                        updateUI()
+                    } else {
+                        Toast.makeText(this, "Error: Chat ID was not saved properly", Toast.LENGTH_LONG).show()
+                        android.util.Log.e("TelegramLoginActivity", "Chat ID not saved properly. Expected: $chatId, Got: $savedChatId")
+                    }
                 },
                 onError = { error ->
                     Toast.makeText(this, error, Toast.LENGTH_LONG).show()

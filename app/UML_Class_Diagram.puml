@@ -1,0 +1,625 @@
+@startuml Gmail_to_Telegram_Pipeline_Architecture
+
+!theme spacelab
+
+title Gmail to Telegram Pipeline - Complete Architecture\nWith Design Patterns Implementation
+
+' Core Interfaces Package
+package "interfaces" {
+    interface MessageSourceService {
+        +isConfigured(): Boolean
+        +retrieveMessages(count: Int, callback: MessageRetrievalCallback): void
+        +markMessageAsProcessed(messageId: String, callback: OperationCallback): void
+    }
+
+    interface MessageService {
+        +isConfigured(): Boolean
+        +sendMessage(content: String, callback: MessageCallback): void
+    }
+
+    interface ProcessingService {
+        +isReady(): Boolean
+        +processText(input: String, callback: ProcessingCallback): void
+    }
+
+    class "MessageSourceService.SourceMessage" as SourceMessage {
+        +id: String
+        +subject: String
+        +content: String
+        +source: String
+        +metadata: Map<String, String>
+    }
+}
+
+' Core Services Package
+package "core_services" {
+    class GmailService {
+        -context: Context
+        -account: GoogleSignInAccount?
+        +isSignedIn(): Boolean
+        +signIn(activity: Activity): void
+        +getUnreadEmails(maxResults: Int): List<Email>
+    }
+
+    class TelegramService {
+        -context: Context
+        -botToken: String?
+        -chatId: String?
+        -isLoggedIn: Boolean
+        +login(token: String, onSuccess: () -> Unit, onError: (String) -> Unit): void
+        +setChatId(id: String): void
+        +sendMessage(text: String, onSuccess: () -> Unit, onError: (String) -> Unit): void
+        +isLoggedIn(): Boolean
+    }
+
+    class llmChatView {
+        -model: Model
+        -inProgress: Boolean
+        +initialize(context: Context, onDone: (String) -> Unit): void
+        +generateResponse(context: Context, input: String, onResult: (String, Boolean) -> Unit, onError: (String) -> Unit): void
+        +stopResponse(model: Model): void
+    }
+
+    class Model {
+        +name: String
+        +version: String
+        +downloadFileName: String
+        +url: String
+        +sizeInBytes: Long
+        +instance: Any?
+    }
+
+    object llmchatmodel {
+        +initialize(context: Context, model: Model, onDone: (String) -> Unit): void
+        +runInference(model: Model, input: String, resultListener: ResultListener): void
+        +resetSession(model: Model): void
+        +cleanUp(model: Model): void
+    }
+}
+
+' Adapter Pattern Implementation
+package "adapters" {
+    class GmailServiceAdapter {
+        -context: Context
+        -gmailService: GmailService
+        +isConfigured(): Boolean
+        +retrieveMessages(count: Int, callback: MessageRetrievalCallback): void
+        +getUnreadMessages(count: Int, callback: (List<SourceMessage>) -> Unit, onError: (String) -> Unit): void
+    }
+
+    class TelegramServiceAdapter {
+        -context: Context
+        -telegramService: TelegramService
+        +isConfigured(): Boolean
+        +sendMessage(content: String, callback: MessageCallback): void
+        +getUnderlyingService(): TelegramService
+    }
+
+    class LlmProcessingAdapter {
+        -model: Model
+        -chatView: llmChatView
+        -isInitialized: Boolean
+        +initialize(context: Context): Boolean
+        +isReady(): Boolean
+        +processText(input: String, callback: ProcessingCallback): void
+    }
+}
+
+' Strategy Pattern Implementation
+package "strategy_pattern" {
+    interface PromptStrategy {
+        +buildPrompt(message: SourceMessage): String
+    }
+
+    class DefaultPromptStrategy {
+        +buildPrompt(message: SourceMessage): String
+    }
+
+    class CustomPromptStrategy {
+        -customPrompt: String
+        +buildPrompt(message: SourceMessage): String
+    }
+
+    class AnalysisPromptStrategy {
+        +buildPrompt(message: SourceMessage): String
+    }
+
+    interface ServiceCreationStrategy {
+        +createEmailFetchService(context: Context, gmailService: GmailService?): EmailFetchService
+        +createContentProcessor(context: Context, model: Model?): ContentProcessor
+        +createDeliveryService(context: Context, telegramService: TelegramService?): MessageDeliveryService
+    }
+
+    class DefaultServiceStrategy {
+        +createEmailFetchService(context: Context, gmailService: GmailService?): EmailFetchService
+        +createContentProcessor(context: Context, model: Model?): ContentProcessor
+        +createDeliveryService(context: Context, telegramService: TelegramService?): MessageDeliveryService
+    }
+
+    class CustomPromptServiceStrategy {
+        -promptStrategy: PromptStrategy
+        +createEmailFetchService(context: Context, gmailService: GmailService?): EmailFetchService
+        +createContentProcessor(context: Context, model: Model?): ContentProcessor
+        +createDeliveryService(context: Context, telegramService: TelegramService?): MessageDeliveryService
+    }
+
+    class MockServiceStrategy {
+        +createEmailFetchService(context: Context, gmailService: GmailService?): EmailFetchService
+        +createContentProcessor(context: Context, model: Model?): ContentProcessor
+        +createDeliveryService(context: Context, telegramService: TelegramService?): MessageDeliveryService
+    }
+}
+
+' Pipeline Components
+package "pipeline" {
+    interface EmailFetchService {
+        +fetchUnreadMessages(count: Int, onSuccess: (List<SourceMessage>) -> Unit, onError: (String) -> Unit): void
+        +fetchMessagesByQuery(query: String, count: Int, onSuccess: (List<SourceMessage>) -> Unit, onError: (String) -> Unit): void
+        +setSearchQuery(query: String?): void
+        +getSearchQuery(): String?
+        +markMessageAsProcessed(messageId: String, callback: OperationCallback): void
+        +isConfigured(): Boolean
+    }
+
+    interface ContentProcessor {
+        +processContent(message: SourceMessage, onComplete: (String) -> Unit, onError: (String) -> Unit): void
+        +isReady(): Boolean
+        +cleanup(): void
+    }
+
+    interface MessageDeliveryService {
+        +sendMessage(content: String, metadata: Map<String, String>, onSuccess: () -> Unit, onError: (String) -> Unit): void
+        +isConfigured(): Boolean
+    }
+
+    interface CancellableService {
+        +cancelPendingOperations(): void
+    }
+
+    class GmailFetchService {
+        -context: Context
+        -messageSourceAdapter: GmailServiceAdapter
+        -searchQuery: String?
+        +fetchUnreadMessages(count: Int, onSuccess: (List<SourceMessage>) -> Unit, onError: (String) -> Unit): void
+        +isConfigured(): Boolean
+    }
+
+    class LlmContentProcessor {
+        -context: Context
+        -model: Model
+        -promptStrategy: PromptStrategy
+        -chatView: llmChatView
+        -isProcessing: AtomicBoolean
+        +processContent(message: SourceMessage, onComplete: (String) -> Unit, onError: (String) -> Unit): void
+        +isReady(): Boolean
+        +setPromptStrategy(strategy: PromptStrategy): void
+    }
+
+    class TelegramDeliveryService {
+        -context: Context
+        -service: TelegramService
+        +sendMessage(content: String, metadata: Map<String, String>, onSuccess: () -> Unit, onError: (String) -> Unit): void
+        +isConfigured(): Boolean
+        +buildFormattedMessage(subject: String, content: String, from: String, date: String): String
+    }
+
+    class EmailProcessingPipeline {
+        -context: Context
+        -fetchService: EmailFetchService
+        -contentProcessor: ContentProcessor
+        -deliveryService: MessageDeliveryService
+        +process(searchQuery: String?, count: Int): void
+        +processSingle(message: SourceMessage, onComplete: () -> Unit, onError: (String) -> Unit): void
+    }
+
+    class Email {
+        +id: String
+        +subject: String
+        +content: String
+        +from: String
+        +date: String
+    }
+}
+
+' Command Pattern Implementation
+package "command_pattern" {
+    interface PipelineCommand {
+        +execute(): Boolean
+        +undo(): Boolean
+        +getDescription(): String
+        +getExecutionTime(): Long?
+    }
+
+    class ProcessEmailsCommand {
+        -pipeline: EmailProcessingPipeline
+        -searchQuery: String?
+        -count: Int
+        -executionTime: Long?
+        +execute(): Boolean
+        +undo(): Boolean
+    }
+
+    class SetPromptCommand {
+        -processor: LlmContentProcessor
+        -newStrategy: PromptStrategy
+        -previousStrategy: PromptStrategy?
+        +execute(): Boolean
+        +undo(): Boolean
+    }
+
+    class PipelineCommandInvoker {
+        -commandHistory: MutableList<PipelineCommand>
+        -maxHistorySize: Int
+        +executeCommand(command: PipelineCommand): Boolean
+        +undoLastCommand(): Boolean
+        +getCommandHistory(): List<PipelineCommand>
+        +clearHistory(): void
+    }
+
+    object PipelineCommandFactory {
+        +createProcessCommand(pipeline: EmailProcessingPipeline, searchQuery: String?, count: Int): PipelineCommand
+        +createSetPromptCommand(processor: LlmContentProcessor, strategy: PromptStrategy): PipelineCommand
+    }
+}
+
+' Template Method Pattern Implementation
+package "template_method_pattern" {
+    abstract class EmailProcessingTemplate {
+        +processEmail(email: Email): Boolean
+        #validateEmail(email: Email): Boolean
+        #preprocessEmail(email: Email): Email?
+        #{abstract} applyLlmProcessing(email: Email): String?
+        #{abstract} sendToDestination(content: String, email: Email): Boolean
+        #formatOutput(processedContent: String, originalEmail: Email): String
+    }
+
+    class TelegramPipelineTemplate {
+        -promptStrategy: PromptStrategy
+        -telegramService: TelegramService
+        +applyLlmProcessing(email: Email): String?
+        +sendToDestination(content: String, email: Email): Boolean
+    }
+
+    class DebugPipelineTemplate {
+        +applyLlmProcessing(email: Email): String?
+        +sendToDestination(content: String, email: Email): Boolean
+    }
+
+    class BatchProcessingTemplate {
+        -promptStrategy: PromptStrategy
+        -outputHandler: (String, Email) -> Unit
+        +applyLlmProcessing(email: Email): String?
+        +sendToDestination(content: String, email: Email): Boolean
+    }
+
+    object PipelineTemplateFactory {
+        +createTelegramTemplate(promptStrategy: PromptStrategy, telegramService: TelegramService): TelegramPipelineTemplate
+        +createDebugTemplate(): DebugPipelineTemplate
+        +createBatchTemplate(promptStrategy: PromptStrategy, outputHandler: (String, Email) -> Unit): BatchProcessingTemplate
+    }
+}
+
+' Chain of Responsibility Pattern Implementation
+package "chain_of_responsibility" {
+    interface ProcessingCallback {
+        +onComplete(message: SourceMessage): void
+        +onError(error: String): void
+    }
+
+    interface ProcessingHandler {
+        +setNext(handler: ProcessingHandler): ProcessingHandler
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    abstract class BaseProcessingHandler {
+        -nextHandler: ProcessingHandler?
+        +setNext(handler: ProcessingHandler): ProcessingHandler
+        #passToNext(message: SourceMessage, callback: ProcessingCallback): void
+        #handleError(error: String, callback: ProcessingCallback): void
+    }
+
+    class ContentProcessingHandler {
+        -processor: ContentProcessor
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    class ValidationHandler {
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    class DeliveryHandler {
+        -deliveryService: MessageDeliveryService
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    class LoggingHandler {
+        -logLevel: LogLevel
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    class FilterHandler {
+        -filter: (SourceMessage) -> Boolean
+        +handle(message: SourceMessage, callback: ProcessingCallback): void
+    }
+
+    class ProcessingChainBuilder {
+        -firstHandler: ProcessingHandler?
+        -lastHandler: ProcessingHandler?
+        +addValidation(): ProcessingChainBuilder
+        +addLogging(level: LogLevel): ProcessingChainBuilder
+        +addFilter(filter: (SourceMessage) -> Boolean): ProcessingChainBuilder
+        +addContentProcessing(processor: ContentProcessor): ProcessingChainBuilder
+        +addDelivery(deliveryService: MessageDeliveryService): ProcessingChainBuilder
+        +build(): ProcessingHandler
+    }
+}
+
+' Factory Pattern Implementation
+package "factory_pattern" {
+    class ServiceConfig {
+        +type: String
+        +parameters: Map<String, Any>
+    }
+
+    class PipelineConfiguration {
+        +fetchService: ServiceConfig
+        +contentProcessor: ServiceConfig
+        +deliveryService: ServiceConfig
+        +processingChain: List<String>
+    }
+
+    interface EnhancedPipelineFactory {
+        +createEmailFetchService(config: ServiceConfig, context: Context): EmailFetchService
+        +createContentProcessor(config: ServiceConfig, context: Context): ContentProcessor
+        +createDeliveryService(config: ServiceConfig, context: Context): MessageDeliveryService
+    }
+
+    class PipelineFactory {
+        -processingServices: Map<String, (Context) -> ProcessingService>
+        -messageSourceServices: Map<String, (Context) -> MessageSourceService>
+        -messageDestinationServices: Map<String, (Context) -> MessageService>
+        +buildPipeline(config: PipelineConfiguration, context: Context): EmailProcessingPipeline
+        +createGmailToTelegramPipeline(context: Context, gmailService: GmailService?, telegramService: TelegramService?): EmailProcessingPipeline
+    }
+
+    class MockEmailFetchService {
+        -context: Context
+        +fetchUnreadMessages(count: Int, onSuccess: (List<SourceMessage>) -> Unit, onError: (String) -> Unit): void
+        +isConfigured(): Boolean
+    }
+
+    class MockContentProcessor {
+        +processContent(message: SourceMessage, onComplete: (String) -> Unit, onError: (String) -> Unit): void
+        +isReady(): Boolean
+    }
+
+    class MockDeliveryService {
+        -context: Context
+        +sendMessage(content: String, metadata: Map<String, String>, onSuccess: () -> Unit, onError: (String) -> Unit): void
+        +isConfigured(): Boolean
+    }
+}
+
+' Observer Pattern Implementation
+package "observer_pattern" {
+    interface PipelineObserver {
+        +onProcessingStarted(query: String?, count: Int): void
+        +onEmailProcessed(email: SourceMessage, processedContent: String): void
+        +onProcessingCompleted(totalProcessed: Int, totalErrors: Int): void
+        +onError(error: String, context: String): void
+    }
+
+    class BroadcastPipelineObserver {
+        -context: Context
+        +onProcessingStarted(query: String?, count: Int): void
+        +onEmailProcessed(email: SourceMessage, processedContent: String): void
+        +onProcessingCompleted(totalProcessed: Int, totalErrors: Int): void
+        +onError(error: String, context: String): void
+    }
+
+    class PipelineEventManager {
+        -observers: MutableList<PipelineObserver>
+        +addObserver(observer: PipelineObserver): void
+        +removeObserver(observer: PipelineObserver): void
+        +notifyProcessingStarted(query: String?, count: Int): void
+        +notifyEmailProcessed(email: SourceMessage, processedContent: String): void
+        +notifyProcessingCompleted(totalProcessed: Int, totalErrors: Int): void
+        +notifyError(error: String, context: String): void
+    }
+}
+
+' Plugin Architecture Implementation
+package "plugin_architecture" {
+    interface PipelinePlugin {
+        +getName(): String
+        +getVersion(): String
+        +initialize(context: Context, config: Map<String, Any>): void
+        +onMessageReceived(message: SourceMessage): void
+        +onMessageProcessed(message: SourceMessage, processedContent: String): void
+        +onMessageDelivered(message: SourceMessage, success: Boolean): void
+        +onError(error: String, context: String): void
+        +cleanup(): void
+    }
+
+    abstract class BasePipelinePlugin {
+        #isInitialized: Boolean
+        #context: Context?
+        #config: Map<String, Any>
+        +initialize(context: Context, config: Map<String, Any>): void
+        +onMessageReceived(message: SourceMessage): void
+        +onMessageProcessed(message: SourceMessage, processedContent: String): void
+        +onMessageDelivered(message: SourceMessage, success: Boolean): void
+        +onError(error: String, context: String): void
+        +cleanup(): void
+    }
+
+    class PluginManager {
+        -plugins: MutableList<PipelinePlugin>
+        +registerPlugin(plugin: PipelinePlugin): void
+        +unregisterPlugin(plugin: PipelinePlugin): void
+        +initializePlugins(context: Context, globalConfig: Map<String, Any>): void
+        +notifyMessageReceived(message: SourceMessage): void
+        +notifyMessageProcessed(message: SourceMessage, processedContent: String): void
+        +notifyMessageDelivered(message: SourceMessage, success: Boolean): void
+        +notifyError(error: String, context: String): void
+        +cleanup(): void
+    }
+
+    class StatisticsPlugin {
+        -messagesReceived: Int
+        -messagesProcessed: Int
+        -messagesDelivered: Int
+        -errors: Int
+        +getName(): String
+        +getVersion(): String
+        +getStats(): Map<String, Int>
+    }
+
+    class ContentFilterPlugin {
+        -blockedWords: List<String>
+        -blockedSenders: List<String>
+        +getName(): String
+        +getVersion(): String
+        -checkIfBlocked(message: SourceMessage): Boolean
+    }
+
+    class NotificationPlugin {
+        +getName(): String
+        +getVersion(): String
+    }
+}
+
+' Main Facade
+package "facade" {
+    class GmailToTelegramPipeline {
+        -context: Context
+        -gmailService: GmailService?
+        -model: Model
+        -telegramService: TelegramService?
+        -serviceCreationStrategy: ServiceCreationStrategy
+        -pipeline: EmailProcessingPipeline?
+        -processingTemplate: EmailProcessingTemplate?
+        -observers: MutableList<PipelineObserver>
+        -commandInvoker: PipelineCommandInvoker
+        -eventManager: PipelineEventManager
+        +process(searchQuery: String?, count: Int): void
+        +undoLastOperation(): Boolean
+        +getExecutionStats(): Map<String, Any>
+        +switchServiceStrategy(newStrategy: ServiceCreationStrategy): void
+        +addObserver(observer: PipelineObserver): void
+        +removeObserver(observer: PipelineObserver): void
+    }
+}
+
+' Relationships - Interfaces
+MessageSourceService <|.. GmailServiceAdapter
+MessageService <|.. TelegramServiceAdapter
+ProcessingService <|.. LlmProcessingAdapter
+
+' Relationships - Strategy Pattern
+PromptStrategy <|.. DefaultPromptStrategy
+PromptStrategy <|.. CustomPromptStrategy
+PromptStrategy <|.. AnalysisPromptStrategy
+ServiceCreationStrategy <|.. DefaultServiceStrategy
+ServiceCreationStrategy <|.. CustomPromptServiceStrategy
+ServiceCreationStrategy <|.. MockServiceStrategy
+
+' Relationships - Pipeline Components
+EmailFetchService <|.. GmailFetchService
+ContentProcessor <|.. LlmContentProcessor
+MessageDeliveryService <|.. TelegramDeliveryService
+MessageDeliveryService <|.. MockDeliveryService
+CancellableService <|.. EmailFetchService
+CancellableService <|.. MessageDeliveryService
+
+' Relationships - Command Pattern
+PipelineCommand <|.. ProcessEmailsCommand
+PipelineCommand <|.. SetPromptCommand
+
+' Relationships - Template Method Pattern
+EmailProcessingTemplate <|.. TelegramPipelineTemplate
+EmailProcessingTemplate <|.. DebugPipelineTemplate
+EmailProcessingTemplate <|.. BatchProcessingTemplate
+
+' Relationships - Chain of Responsibility
+ProcessingHandler <|.. BaseProcessingHandler
+BaseProcessingHandler <|.. ContentProcessingHandler
+BaseProcessingHandler <|.. ValidationHandler
+BaseProcessingHandler <|.. DeliveryHandler
+BaseProcessingHandler <|.. LoggingHandler
+BaseProcessingHandler <|.. FilterHandler
+
+' Relationships - Factory Pattern
+EnhancedPipelineFactory <|.. PipelineFactory
+EmailFetchService <|.. MockEmailFetchService
+ContentProcessor <|.. MockContentProcessor
+
+' Relationships - Observer Pattern
+PipelineObserver <|.. BroadcastPipelineObserver
+
+' Relationships - Plugin Architecture
+PipelinePlugin <|.. BasePipelinePlugin
+BasePipelinePlugin <|.. StatisticsPlugin
+BasePipelinePlugin <|.. ContentFilterPlugin
+BasePipelinePlugin <|.. NotificationPlugin
+
+' Composition and Usage Relationships
+GmailToTelegramPipeline *-- EmailProcessingPipeline
+GmailToTelegramPipeline *-- ServiceCreationStrategy
+GmailToTelegramPipeline *-- EmailProcessingTemplate
+GmailToTelegramPipeline *-- PipelineCommandInvoker
+GmailToTelegramPipeline *-- PipelineEventManager
+
+EmailProcessingPipeline *-- EmailFetchService
+EmailProcessingPipeline *-- ContentProcessor
+EmailProcessingPipeline *-- MessageDeliveryService
+
+LlmContentProcessor *-- PromptStrategy
+LlmContentProcessor *-- llmChatView
+
+GmailFetchService *-- GmailServiceAdapter
+TelegramDeliveryService *-- TelegramService
+
+GmailServiceAdapter *-- GmailService
+TelegramServiceAdapter *-- TelegramService
+LlmProcessingAdapter *-- llmChatView
+
+llmChatView *-- Model
+llmChatView ..> llmchatmodel
+
+PipelineCommandInvoker *-- PipelineCommand
+PipelineEventManager *-- PipelineObserver
+PluginManager *-- PipelinePlugin
+
+' Factory relationships
+PipelineFactory ..> EmailProcessingPipeline : creates
+PipelineFactory ..> MockEmailFetchService : creates
+PipelineFactory ..> MockContentProcessor : creates
+PipelineFactory ..> MockDeliveryService : creates
+
+ServiceCreationStrategy ..> EmailFetchService : creates
+ServiceCreationStrategy ..> ContentProcessor : creates
+ServiceCreationStrategy ..> MessageDeliveryService : creates
+
+PipelineTemplateFactory ..> EmailProcessingTemplate : creates
+PipelineCommandFactory ..> PipelineCommand : creates
+
+ProcessingChainBuilder ..> ProcessingHandler : creates
+
+note top of GmailToTelegramPipeline : **Main Facade Class**\nIntegrates all design patterns:\n- Strategy Pattern for service creation\n- Command Pattern for operations\n- Observer Pattern for notifications\n- Template Method for processing\n- Chain of Responsibility for handling\n- Factory Pattern for object creation\n- Plugin Architecture for extensibility
+
+note top of strategy_pattern : **Strategy Pattern**\nEnables runtime algorithm\nselection for prompts\nand service creation
+
+note top of command_pattern : **Command Pattern**\nProvides undo/redo functionality\nand operation encapsulation
+
+note top of template_method_pattern : **Template Method Pattern**\nDefines processing workflow\nwith customizable steps
+
+note top of chain_of_responsibility : **Chain of Responsibility**\nFlexible message processing\nthrough handler chains
+
+note top of factory_pattern : **Factory Pattern**\nCentralized object creation\nwith configuration support
+
+note top of observer_pattern : **Observer Pattern**\nEvent-driven notifications\nfor pipeline activities
+
+note top of plugin_architecture : **Plugin Architecture**\nRuntime extensibility\nthrough plugin system
+
+@enduml

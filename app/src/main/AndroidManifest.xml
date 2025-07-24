@@ -45,6 +45,26 @@
             android:name=".LlmPromptActivity"
             android:label="LLM Prompt Configuration"
             android:parentActivityName=".PipelineActivity" />
+        <activity
+            android:name=".TelegramToGmailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Telegram to Gmail Pipeline" />
+        <activity
+            android:name=".TelegramConfigActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Configure Telegram Bot" />
+        <activity
+            android:name=".EmailConfigActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Configure Email" />
+        <activity
+            android:name=".TelegramPromptActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Configure LLM Prompt" />
     </application>
 
 </manifest>
