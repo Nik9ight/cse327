@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.hilt.application)
     kotlin("kapt")
+    id("kotlin-parcelize")
     id("com.google.gms.google-services")
 }
 

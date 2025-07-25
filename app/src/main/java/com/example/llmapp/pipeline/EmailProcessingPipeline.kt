@@ -159,15 +159,22 @@ class EmailProcessingPipeline(
         successCount = 0
         failureCount = 0
         
+        Log.d(TAG, "processEmails called with count: $count")
+        
         if (!isConfigured()) {
             Log.e(TAG, "Pipeline is not properly configured")
+            Log.e(TAG, "Email fetch service ready: ${emailFetchService.isConfigured()}")
+            Log.e(TAG, "Content processor ready: ${contentProcessor.isReady()}")
+            Log.e(TAG, "Delivery service configured: ${deliveryService.isConfigured()}")
             eventManager.notifyBatchComplete(0, 0)
             return
         }
         
         Log.d(TAG, "Starting email processing pipeline for $count emails")
+        Log.d(TAG, "All services are properly configured")
         
         // Step 1: Fetch emails
+        Log.d(TAG, "Calling emailFetchService.fetchUnreadMessages...")
         emailFetchService.fetchUnreadMessages(
             count,
             onSuccess = { messages ->
@@ -180,6 +187,7 @@ class EmailProcessingPipeline(
                 }
                 
                 // Process messages sequentially
+                Log.d(TAG, "Processing ${messages.size} messages sequentially...")
                 processMessagesSequentially(messages)
             },
             onError = { error ->

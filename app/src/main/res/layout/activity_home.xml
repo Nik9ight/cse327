@@ -51,6 +51,15 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
+        android:id="@+id/workflowsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your Workflows"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/primary"
+        android:textColor="@color/white"/>
+
+    <Button
         android:id="@+id/m1Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".LLMApplication"
@@ -65,6 +66,16 @@
             android:exported="false"
             android:theme="@style/Theme.LLMAPP"
             android:label="Configure LLM Prompt" />
+        <activity
+            android:name=".WorkflowListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Your Workflows" />
+        <activity
+            android:name=".WorkflowCreateActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Create Workflow" />
     </application>
 
 </manifest>
