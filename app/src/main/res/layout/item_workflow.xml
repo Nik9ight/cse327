@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:clickable="false"
+    android:focusable="false"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/surface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header Row -->
+        <LinearLayout
+            android:id="@+id/headerClickableArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="4dp">
+
+            <!-- Workflow Icon -->
+            <ImageView
+                android:id="@+id/workflowIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_workflow_24"
+                android:tint="@color/primary" />
+
+            <!-- Title and Type -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/workflowName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Workflow Name"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_text"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/workflowType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Gmail → Telegram"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
+            <!-- Status Badge -->
+            <TextView
+                android:id="@+id/statusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Active"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:background="@color/status_enabled"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp" />
+
+        </LinearLayout>
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/workflowDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Workflow description goes here..."
+            android:textSize="14sp"
+            android:textColor="@color/secondary_text"
+            android:layout_marginBottom="12dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:visibility="visible" />
+
+        <!-- Configuration Summary -->
+        <LinearLayout
+            android:id="@+id/configSummaryLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp">
+
+            <!-- Gmail to Telegram Summary -->
+            <LinearLayout
+                android:id="@+id/gmailToTelegramSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Query:"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text" />
+
+                <TextView
+                    android:id="@+id/gmailQueryText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="is:unread"
+                    android:textSize="12sp"
+                    android:textColor="@color/primary_text"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
+            <!-- Telegram to Gmail Summary -->
+            <LinearLayout
+                android:id="@+id/telegramToGmailSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Recipients:"
+                    android:textSize="12sp"
+                    android:textColor="@color/secondary_text" />
+
+                <TextView
+                    android:id="@+id/gmailRecipientsText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="user@example.com"
+                    android:textSize="12sp"
+                    android:textColor="@color/primary_text"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Last Run Info -->
+        <LinearLayout
+            android:id="@+id/lastRunLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Last run: "
+                android:textSize="12sp"
+                android:textColor="@color/secondary_text" />
+
+            <TextView
+                android:id="@+id/lastRunTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Never"
+                android:textSize="12sp"
+                android:textColor="@color/secondary_text" />
+
+            <TextView
+                android:id="@+id/lastRunStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Success"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/success" />
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/editButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="Edit"
+                android:textSize="12sp"
+                android:textColor="@color/secondary_text"
+                android:minWidth="64dp"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+            <Button
+                android:id="@+id/duplicateButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="Copy"
+                android:textSize="12sp"
+                android:textColor="@color/secondary_text"
+                android:minWidth="64dp"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="Delete"
+                android:textSize="12sp"
+                android:textColor="@color/error"
+                android:minWidth="64dp"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+            <Button
+                android:id="@+id/runButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Run"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary"
+                android:minWidth="64dp"
+                android:clickable="true"
+                android:focusable="true"
+                style="@style/Widget.MaterialComponents.Button" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

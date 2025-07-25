@@ -39,6 +39,7 @@ class HomeActivity : ComponentActivity() {
         val telegramSetupButton = findViewById<Button>(R.id.telegramSetupButton)
         val pipelineButton = findViewById<Button>(R.id.pipelineButton)
         val telegramToGmailButton = findViewById<Button>(R.id.telegramToGmailButton)
+        val workflowsButton = findViewById<Button>(R.id.workflowsButton)
         m1Button = findViewById(R.id.m1Button)
         val textImageButton = findViewById<Button>(R.id.textImageButton)
 
@@ -64,6 +65,10 @@ class HomeActivity : ComponentActivity() {
         
         telegramToGmailButton.setOnClickListener {
             startActivity(Intent(this, TelegramToGmailActivity::class.java))
+        }
+        
+        workflowsButton.setOnClickListener {
+            startActivity(Intent(this, WorkflowListActivity::class.java))
         }
         
         m1Button.setOnClickListener {
