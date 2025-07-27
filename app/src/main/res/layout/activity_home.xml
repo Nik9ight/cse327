@@ -4,72 +4,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:padding="32dp">
+    android:padding="32dp"
+    android:background="@drawable/app_background_charcoal">
 
-    <TextView
-        android:id="@+id/homeTitle"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to LLMAPP"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="48dp">
+
+        <TextView
+            android:id="@+id/homeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to LLMAPP"
+            style="@style/WelcomeTextStyle"/>
+
+        <ImageView
+            android:id="@+id/blinkingDot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:src="@drawable/blinking_dot"/>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/signInButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign In with Google"
-        android:layout_marginBottom="16dp"/>
+        android:text="SIGN IN WITH GOOGLE"
+        style="@style/LLMAPPButtonStyle"/>
 
     <Button
         android:id="@+id/enablePermissionsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enable Permissions"
-        android:layout_marginBottom="16dp"/>
+        android:text="ENABLE PERMISSIONS"
+        style="@style/LLMAPPButtonStyle"/>
 
     <Button
         android:id="@+id/telegramSetupButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Setup Telegram Bot"
-        android:layout_marginBottom="16dp"/>
+        android:text="SETUP TELEGRAM BOT"
+        style="@style/LLMAPPButtonStyle"/>
 
     <Button
         android:id="@+id/pipelineButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Email to Telegram Pipeline"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/telegramToGmailButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Telegram to Gmail Pipeline"
-        android:layout_marginBottom="16dp"/>
+        android:text="PIPELINES"
+        android:drawableEnd="@drawable/dropdown_arrow_selector"
+        android:drawablePadding="12dp"
+        android:gravity="center"
+        style="@style/LLMAPPButtonStyle"/>
 
     <Button
         android:id="@+id/workflowsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Your Workflows"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/primary"
-        android:textColor="@color/white"/>
+        android:text="YOUR WORKFLOWS"
+        style="@style/LLMAPPButtonStyle"/>
 
     <Button
-        android:id="@+id/m1Button"
+        android:id="@+id/llmButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="M1"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/textImageButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="M2(Multimodal)"/>
+        android:text="LLM AND MULTIMODELS"
+        android:drawableEnd="@drawable/dropdown_arrow_selector"
+        android:drawablePadding="12dp"
+        android:gravity="center"
+        style="@style/LLMAPPButtonStyle"/>
 
 </LinearLayout>

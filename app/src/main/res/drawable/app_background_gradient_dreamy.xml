@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base gradient -->
+    <item>
+        <shape>
+            <gradient
+                android:angle="135"
+                android:startColor="#F1E7E7"
+                android:centerColor="#F3E8FF"
+                android:endColor="#E9D5FF"
+                android:type="linear" />
+        </shape>
+    </item>
+    
+    <!-- Overlay radial gradient for organic feel -->
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.3"
+                android:centerY="0.7"
+                android:gradientRadius="800dp"
+                android:startColor="#22DDD6FE"
+                android:endColor="#00FFFFFF"
+                android:type="radial" />
+        </shape>
+    </item>
+    
+    <!-- Another soft overlay -->
+    <item>
+        <shape>
+            <gradient
+                android:centerX="0.8"
+                android:centerY="0.2"
+                android:gradientRadius="600dp"
+                android:startColor="#22F1E7E7"
+                android:endColor="#00FFFFFF"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>
