@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#001122"
+    android:padding="16dp"
+    android:fillViewport="true">
     
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingBottom="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Gmail to Telegram Pipeline"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="24dp"
+        android:textColor="#FFFFFF" />
         
     <TextView
         android:id="@+id/workflowInstructionText"
@@ -24,14 +28,16 @@
         android:layout_height="wrap_content"
         android:text="Follow these steps to set up your workflow:"
         android:textStyle="italic"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:textColor="#FFFFFF" />
         
     <TextView
         android:id="@+id/statusTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Status: Checking configurations..."
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:textColor="#FFFFFF" />
         
     <ProgressBar
         android:id="@+id/progressBar"
@@ -39,287 +45,451 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:visibility="gone"
-        android:layout_marginBottom="8dp" />
-        
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#CCCCCC"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="24dp" />
         
     <!-- Step 1: Gmail Sign In -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:id="@+id/step1Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp">
+        android:orientation="vertical"
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="8dp">
         
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
             
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 1: Gmail Integration"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sign in to your Gmail account to access emails"
-                android:layout_marginBottom="8dp" />
-                
             <Button
                 android:id="@+id/gmailSignInButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Step 1: Sign In to Gmail"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp" />
+
+            <Button
+                android:id="@+id/step1InfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step1Content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Sign In to Gmail" />
+                android:text="Gmail Integration - Sign in to your Gmail account to access emails"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
                 
             <TextView
                 android:id="@+id/step1StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status: Not signed in"
-                android:textColor="#757575"
+                android:textColor="#FFFFFF"
                 android:textStyle="italic"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
     
     <!-- Step 2: Email Search Query -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:id="@+id/step2Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="8dp"
         android:alpha="0.5">
         
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
             
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 2: Set Search Query"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Define which emails to process using Gmail search queries"
-                android:layout_marginBottom="8dp" />
-                
             <Button
                 android:id="@+id/searchQueryButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Step 2: Set Search Query"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/step2InfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step2Content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set Search Query"
-                android:enabled="false" />
+                android:text="Set Search Query - Define which emails to process using Gmail search queries"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
                 
             <TextView
                 android:id="@+id/step2StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status: Complete Step 1 first"
-                android:textColor="#757575"
+                android:textColor="#FFFFFF"
                 android:textStyle="italic"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
     
     <!-- Step 3: LLM Prompt Configuration -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:id="@+id/step3Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="8dp"
         android:alpha="0.5">
         
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
             
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 3: Configure LLM Prompt"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Customize the prompt used by the LLM to process your emails"
-                android:layout_marginBottom="8dp" />
-                
             <Button
                 android:id="@+id/llmPromptButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Step 3: Set LLM Prompt"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/step3InfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step3Content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set LLM Prompt"
-                android:enabled="false" />
+                android:text="Configure LLM Prompt - Customize the prompt used by the LLM to process your emails"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
                 
             <TextView
                 android:id="@+id/step3StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status: Complete Step 1 first"
-                android:textColor="#757575"
+                android:textColor="#FFFFFF"
                 android:textStyle="italic"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
     
     <!-- Step 4: Telegram Setup -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:id="@+id/step4Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="32dp"
         android:alpha="0.5">
         
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
             
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 4: Configure Telegram"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Set up your Telegram bot to receive processed emails"
-                android:layout_marginBottom="8dp" />
-                
             <Button
                 android:id="@+id/telegramSetupButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Step 4: Setup Telegram Bot"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/step4InfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step4Content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Setup Telegram Bot"
-                android:enabled="false" />
+                android:text="Configure Telegram - Set up your Telegram bot to receive processed emails"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
                 
             <TextView
                 android:id="@+id/step4StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status: Complete Step 1 first"
-                android:textColor="#757575"
+                android:textColor="#FFFFFF"
                 android:textStyle="italic"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:padding="8dp"
+                android:background="@drawable/card_background" />
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
     
     <!-- Step 5: Run Workflow -->
-    <androidx.cardview.widget.CardView
+    <LinearLayout
         android:id="@+id/step5Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="32dp"
         android:alpha="0.5">
         
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
             
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Step 5: Run Workflow"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp" />
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Run the workflow to process emails and send to Telegram"
-                android:layout_marginBottom="8dp" />
-                
             <Button
                 android:id="@+id/runWorkflowButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Run Workflow"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/step5InfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/step5Content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Run Workflow"
-                android:enabled="false" />
+                android:text="Run Workflow - Run the workflow to process emails and send to Telegram"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/card_background" />
                 
             <TextView
                 android:id="@+id/step5StatusText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Status: Complete previous steps first"
-                android:textColor="#757575"
+                android:textColor="#FFFFFF"
                 android:textStyle="italic"
-                android:layout_marginTop="8dp" />
+                android:padding="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/card_background" />
                 
             <Switch
                 android:id="@+id/autoProcessSwitch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Enable automatic processing"
+                android:textColor="#FFFFFF"
                 android:checked="false"
-                android:layout_marginTop="8dp"
                 android:enabled="false" />
+
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </LinearLayout>
     
-    <!-- Advanced Options (Hidden by default) -->
-    <Button
-        android:id="@+id/toggleAdvancedOptionsButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Show Advanced Options"
-        android:textAllCaps="false"
-        android:layout_marginBottom="16dp"
-        style="@style/Widget.MaterialComponents.Button.TextButton" />
-        
+    <!-- Advanced Options -->
     <LinearLayout
-        android:id="@+id/advancedOptionsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone">
-        
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#CCCCCC"
-            android:layout_marginBottom="16dp" />
-        
-        <TextView
+        android:background="@drawable/card_background"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test with Sample Email"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/toggleAdvancedOptionsButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Show Advanced Options"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/advancedInfoButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="i"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/advancedOptionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Advanced Options - Test with sample email and additional settings"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/card_background" />
             
-        <Button
-            android:id="@+id/processSampleEmailButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Process Sample Email" />
+            <Button
+                android:id="@+id/processSampleEmailButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Process Sample Email"
+                android:background="@drawable/card_background"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif"
+                android:elevation="4dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
     </LinearLayout>

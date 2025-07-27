@@ -363,7 +363,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     private fun completeStep1() {
         step1Completed = true
         step1StatusText.text = "Signed in to Gmail"
-        gmailSignInButton.text = "Re-authenticate Gmail"
+        gmailSignInButton.text = "Step 1: Re-authenticate Gmail"
     }
     
     /**
@@ -385,7 +385,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
         currentLlmPrompt = prompt
         val displayPrompt = if (prompt.isNullOrBlank()) "Default prompt" else "Custom prompt"
         step3StatusText.text = "LLM Prompt: $displayPrompt"
-        llmPromptButton.text = "Change LLM Prompt"
+        llmPromptButton.text = "Step 3: Change LLM Prompt"
     }
     
     /**
@@ -394,7 +394,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
     private fun completeStep4() {
         step4Completed = true
         step4StatusText.text = "Telegram bot configured"
-        telegramSetupButton.text = "Re-configure Telegram"
+        telegramSetupButton.text = "Step 4: Re-configure Telegram"
     }
     
     /**
@@ -583,7 +583,7 @@ class PipelineActivity : ComponentActivity(), GmailToTelegramPipeline.PipelineCo
                     // Display the query in the UI
                     val displayQuery = if (query.isNullOrBlank()) "Default (unread emails)" else query
                     step2StatusText.text = "Search query set: $displayQuery"
-                    searchQueryButton.text = "Change Search Query"
+                    searchQueryButton.text = "Step 2: Change Search Query"
 
                     // Store the query in the fetch service
                     val fetchService = pipeline.getEmailFetchService() as? GmailFetchService
