@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/dot_visible" android:duration="1500" />
+    <item android:drawable="@drawable/dot_fading_75" android:duration="200" />
+    <item android:drawable="@drawable/dot_fading" android:duration="200" />
+    <item android:drawable="@drawable/dot_fading_25" android:duration="200" />
+    <item android:drawable="@drawable/dot_invisible" android:duration="1500" />
+    <item android:drawable="@drawable/dot_fading_25" android:duration="200" />
+    <item android:drawable="@drawable/dot_fading" android:duration="200" />
+    <item android:drawable="@drawable/dot_fading_75" android:duration="200" />
+</animation-list>

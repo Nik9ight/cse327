@@ -1,10 +1,13 @@
 package com.example.llmapp
 
 import android.content.Intent
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.widget.PopupMenu
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 
 class HomeActivity : ComponentActivity() {
@@ -24,11 +27,15 @@ class HomeActivity : ComponentActivity() {
         android.Manifest.permission.READ_PHONE_STATE,
         android.Manifest.permission.READ_PHONE_NUMBERS
     )
-    private lateinit var m1Button: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        
+        // Start the blinking dot animation
+        findViewById<ImageView>(R.id.blinkingDot)?.let { blinkingDot ->
+            (blinkingDot.drawable as? AnimationDrawable)?.start()
+        }
 
         login = Login(this)
         login.initGoogleSignIn()
@@ -38,10 +45,8 @@ class HomeActivity : ComponentActivity() {
         val enablePermissionsButton = findViewById<Button>(R.id.enablePermissionsButton)
         val telegramSetupButton = findViewById<Button>(R.id.telegramSetupButton)
         val pipelineButton = findViewById<Button>(R.id.pipelineButton)
-        val telegramToGmailButton = findViewById<Button>(R.id.telegramToGmailButton)
         val workflowsButton = findViewById<Button>(R.id.workflowsButton)
-        m1Button = findViewById(R.id.m1Button)
-        val textImageButton = findViewById<Button>(R.id.textImageButton)
+        val llmButton = findViewById<Button>(R.id.llmButton)
 
         signInButton.setOnClickListener {
             login.signIn()
@@ -59,25 +64,59 @@ class HomeActivity : ComponentActivity() {
             startActivity(Intent(this, TelegramLoginActivity::class.java))
         }
         
-        pipelineButton.setOnClickListener {
-            startActivity(Intent(this, PipelineActivity::class.java))
-        }
-        
-        telegramToGmailButton.setOnClickListener {
-            startActivity(Intent(this, TelegramToGmailActivity::class.java))
+        pipelineButton.setOnClickListener { view ->
+            showPipelineMenu(view)
         }
         
         workflowsButton.setOnClickListener {
             startActivity(Intent(this, WorkflowListActivity::class.java))
         }
         
-        m1Button.setOnClickListener {
-            startActivity(Intent(this, M1Activity::class.java))
+        llmButton.setOnClickListener { view ->
+            showLLMMenu(view)
+        }
+    }
+
+    private fun showPipelineMenu(view: android.view.View) {
+        val popup = PopupMenu(this, view)
+        popup.menuInflater.inflate(R.menu.pipeline_menu, popup.menu)
+        
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_email_to_telegram -> {
+                    startActivity(Intent(this, PipelineActivity::class.java))
+                    true
+                }
+                R.id.menu_telegram_to_gmail -> {
+                    startActivity(Intent(this, TelegramToGmailActivity::class.java))
+                    true
+                }
+                else -> false
+            }
         }
         
-        textImageButton.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+        popup.show()
+    }
+
+    private fun showLLMMenu(view: android.view.View) {
+        val popup = PopupMenu(this, view)
+        popup.menuInflater.inflate(R.menu.llm_menu, popup.menu)
+        
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_m1 -> {
+                    startActivity(Intent(this, M1Activity::class.java))
+                    true
+                }
+                R.id.menu_m2_multimodal -> {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    true
+                }
+                else -> false
+            }
         }
+        
+        popup.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
