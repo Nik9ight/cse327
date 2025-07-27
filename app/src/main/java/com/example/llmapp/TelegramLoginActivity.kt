@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.widget.PopupMenu
 
 class TelegramLoginActivity : ComponentActivity() {
     private lateinit var telegramService: TelegramService
@@ -20,12 +21,10 @@ class TelegramLoginActivity : ComponentActivity() {
         val botTokenEditText = findViewById<EditText>(R.id.botTokenEditText)
         val connectBotButton = findViewById<Button>(R.id.connectBotButton)
         val chatIdEditText = findViewById<EditText>(R.id.chatIdEditText)
-        val findChatIdButton = findViewById<Button>(R.id.findChatIdButton)
         val saveChatIdButton = findViewById<Button>(R.id.saveChatIdButton)
-        val testMessageButton = findViewById<Button>(R.id.testMessageButton)
+        val moreOptionsButton = findViewById<Button>(R.id.moreOptionsButton)
         val botTokenHelpText = findViewById<TextView>(R.id.botTokenHelpText)
         val chatIdHelpText = findViewById<TextView>(R.id.chatIdHelpText)
-        val troubleshootButton = findViewById<Button>(R.id.troubleshootButton)
         
         // Make help text links clickable
         botTokenHelpText.movementMethod = LinkMovementMethod.getInstance()
@@ -33,8 +32,6 @@ class TelegramLoginActivity : ComponentActivity() {
         
         // Check if already logged in
         if (telegramService.isLoggedIn()) {
-            testMessageButton.isEnabled = true
-            
             // Display current saved chat ID if available
             val savedChatId = telegramService.getChatId()
             if (!savedChatId.isNullOrEmpty()) {
@@ -68,63 +65,93 @@ class TelegramLoginActivity : ComponentActivity() {
             )
         }
         
-        findChatIdButton.setOnClickListener {
-            telegramService.openTelegramToFindChatId()
-        }
-        
         saveChatIdButton.setOnClickListener {
-            val chatId = chatIdEditText.text.toString().trim()
-            if (chatId.isEmpty()) {
-                Toast.makeText(this, "Please enter a chat ID", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            
-            // First verify the chat ID
-            Toast.makeText(this, "Verifying chat ID...", Toast.LENGTH_SHORT).show()
-            telegramService.verifyChatId(chatId,
-                onSuccess = {
-                    // Save the chat ID only if verification succeeds
-                    telegramService.setChatId(chatId)
-                    
-                    // Verify that the chat ID was actually saved
-                    val savedChatId = telegramService.getChatId()
-                    if (savedChatId == chatId) {
-                        Toast.makeText(this, "Chat ID verified and saved successfully: $chatId", Toast.LENGTH_LONG).show()
-                        android.util.Log.d("TelegramLoginActivity", "Chat ID successfully saved: $chatId")
-                        updateUI()
-                    } else {
-                        Toast.makeText(this, "Error: Chat ID was not saved properly", Toast.LENGTH_LONG).show()
-                        android.util.Log.e("TelegramLoginActivity", "Chat ID not saved properly. Expected: $chatId, Got: $savedChatId")
-                    }
-                },
-                onError = { error ->
-                    Toast.makeText(this, error, Toast.LENGTH_LONG).show()
-                    // Show help dialog with instructions
-                    showChatIdHelpDialog()
-                }
-            )
+            saveChatId()
         }
         
-        testMessageButton.setOnClickListener {
-            telegramService.sendMessage(
-                text = "Test message from LLMAPP",
-                onSuccess = {
-                    Toast.makeText(this, "Message sent successfully", Toast.LENGTH_SHORT).show()
-                },
-                onError = { error ->
-                    Toast.makeText(this, "Error: $error", Toast.LENGTH_LONG).show()
-                }
-            )
-        }
-        
-        troubleshootButton.setOnClickListener {
-            showChatIdHelpDialog()
+        moreOptionsButton.setOnClickListener { view ->
+            showMoreOptionsMenu(view)
         }
     }
     
+    private fun showMoreOptionsMenu(view: android.view.View) {
+        val popup = PopupMenu(this, view)
+        popup.menuInflater.inflate(R.menu.telegram_options_menu, popup.menu)
+        
+        // Enable/disable menu items based on current state
+        val testMenuItem = popup.menu.findItem(R.id.menu_test_message)
+        testMenuItem.isEnabled = telegramService.isLoggedIn()
+        
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_find_chat_id -> {
+                    telegramService.openTelegramToFindChatId()
+                    true
+                }
+                R.id.menu_test_message -> {
+                    sendTestMessage()
+                    true
+                }
+                R.id.menu_troubleshoot -> {
+                    showChatIdHelpDialog()
+                    true
+                }
+                else -> false
+            }
+        }
+        
+        popup.show()
+    }
+    
+    private fun saveChatId() {
+        val chatIdEditText = findViewById<EditText>(R.id.chatIdEditText)
+        val chatId = chatIdEditText.text.toString().trim()
+        if (chatId.isEmpty()) {
+            Toast.makeText(this, "Please enter a chat ID", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // First verify the chat ID
+        Toast.makeText(this, "Verifying chat ID...", Toast.LENGTH_SHORT).show()
+        telegramService.verifyChatId(chatId,
+            onSuccess = {
+                // Save the chat ID only if verification succeeds
+                telegramService.setChatId(chatId)
+                
+                // Verify that the chat ID was actually saved
+                val savedChatId = telegramService.getChatId()
+                if (savedChatId == chatId) {
+                    Toast.makeText(this, "Chat ID verified and saved successfully: $chatId", Toast.LENGTH_LONG).show()
+                    android.util.Log.d("TelegramLoginActivity", "Chat ID successfully saved: $chatId")
+                    updateUI()
+                } else {
+                    Toast.makeText(this, "Error: Chat ID was not saved properly", Toast.LENGTH_LONG).show()
+                    android.util.Log.e("TelegramLoginActivity", "Chat ID not saved properly. Expected: $chatId, Got: $savedChatId")
+                }
+            },
+            onError = { error ->
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+                // Show help dialog with instructions
+                showChatIdHelpDialog()
+            }
+        )
+    }
+    
+    private fun sendTestMessage() {
+        telegramService.sendMessage(
+            text = "Test message from LLMAPP",
+            onSuccess = {
+                Toast.makeText(this, "Message sent successfully", Toast.LENGTH_SHORT).show()
+            },
+            onError = { error ->
+                Toast.makeText(this, "Error: $error", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+    
     private fun updateUI() {
-        val testMessageButton = findViewById<Button>(R.id.testMessageButton)
-        testMessageButton.isEnabled = telegramService.isLoggedIn()
+        // UI state is now managed by the dropdown menu
+        // Test message availability is handled in the popup menu
     }
     
     private fun showChatIdHelpDialog() {

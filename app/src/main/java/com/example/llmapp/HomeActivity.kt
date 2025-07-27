@@ -43,7 +43,6 @@ class HomeActivity : ComponentActivity() {
 
         val signInButton = findViewById<Button>(R.id.signInButton)
         val enablePermissionsButton = findViewById<Button>(R.id.enablePermissionsButton)
-        val telegramSetupButton = findViewById<Button>(R.id.telegramSetupButton)
         val pipelineButton = findViewById<Button>(R.id.pipelineButton)
         val workflowsButton = findViewById<Button>(R.id.workflowsButton)
         val llmButton = findViewById<Button>(R.id.llmButton)
@@ -58,10 +57,6 @@ class HomeActivity : ComponentActivity() {
             } else {
                 Toast.makeText(this, "All permissions already granted", Toast.LENGTH_SHORT).show()
             }
-        }
-        
-        telegramSetupButton.setOnClickListener {
-            startActivity(Intent(this, TelegramLoginActivity::class.java))
         }
         
         pipelineButton.setOnClickListener { view ->
