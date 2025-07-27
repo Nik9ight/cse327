@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:fillViewport="true"
-    android:scrollbars="vertical">
+    android:scrollbars="vertical"
+    android:background="#001122">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,19 +21,12 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Configuration Steps -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Configuration Steps"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="24dp"
+            android:textColor="#FFFFFF" />
 
         <!-- Step 1: Telegram Configuration -->
         <LinearLayout
+            android:id="@+id/step1Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -40,33 +34,61 @@
             android:padding="16dp"
             android:layout_marginBottom="8dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 1: Configure Telegram Bot"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/step1StatusText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Configure Telegram Bot"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                <Button
+                    android:id="@+id/step1Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Step 1: Configure Telegram"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
 
-            <Button
-                android:id="@+id/step1Button"
+                <Button
+                    android:id="@+id/step1InfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/step1Content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Configure Telegram" />
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/step1StatusText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Configure Telegram Bot - Set up bot token and channel settings"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:background="@drawable/card_background" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <!-- Step 2: Email Configuration -->
         <LinearLayout
+            android:id="@+id/step2Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -74,33 +96,61 @@
             android:padding="16dp"
             android:layout_marginBottom="8dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 2: Configure Email Recipients"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/step2StatusText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Set Email Recipients"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                <Button
+                    android:id="@+id/step2Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Step 2: Set Email Recipients"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
 
-            <Button
-                android:id="@+id/step2Button"
+                <Button
+                    android:id="@+id/step2InfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/step2Content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set Email Recipients" />
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/step2StatusText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Configure Email Recipients - Add email addresses to receive notifications"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:background="@drawable/card_background" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <!-- Step 3: LLM Prompt Configuration -->
         <LinearLayout
+            android:id="@+id/step3Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -108,33 +158,266 @@
             android:padding="16dp"
             android:layout_marginBottom="8dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 3: Configure LLM Prompt"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/step3StatusText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Configure LLM Prompt"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                <Button
+                    android:id="@+id/step3Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Step 3: Configure Prompt"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
 
-            <Button
-                android:id="@+id/step3Button"
+                <Button
+                    android:id="@+id/step3InfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/step3Content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Configure Prompt" />
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/step3StatusText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Configure LLM Prompt - Set up AI prompts for processing messages"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:background="@drawable/card_background" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <!-- Step 4: Gmail Configuration -->
         <LinearLayout
+            android:id="@+id/step4Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/step4Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Step 4: Configure Gmail"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
+
+                <Button
+                    android:id="@+id/step4InfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/step4Content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/step4StatusText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Configure Gmail Service - Set up Gmail API credentials and settings"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:background="@drawable/card_background" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Pipeline Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_background"
+            android:padding="16dp"
+            android:layout_marginBottom="32dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/runPipelineButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Run Pipeline"
+                    android:layout_marginEnd="8dp"
+                    android:enabled="false"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
+
+                <Button
+                    android:id="@+id/actionsInfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/actionsContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
+
+                    <Button
+                        android:id="@+id/testConnectionsButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Test Connections"
+                        android:layout_marginEnd="8dp"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    <Button
+                        android:id="@+id/clearHistoryButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Clear History"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                </LinearLayout>
+
+                <!-- Advanced Options -->
+                <LinearLayout
+                    android:id="@+id/advancedOptionsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/card_background"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Advanced Configuration"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="#FFFFFF" />
+
+                    <!-- Email Template -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Email Template Type"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="12sp"
+                        android:textColor="#FFFFFF" />
+
+                    <Spinner
+                        android:id="@+id/templateSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Batch Size -->
+                    <TextView
+                        android:id="@+id/batchSizeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Batch Size: 5"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="12sp"
+                        android:textColor="#FFFFFF" />
+
+                    <SeekBar
+                        android:id="@+id/batchSizeSeekBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Delay Between Emails -->
+                    <TextView
+                        android:id="@+id/delayText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Delay: 1000ms"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="12sp"
+                        android:textColor="#FFFFFF" />
+
+                    <SeekBar
+                        android:id="@+id/delaySeekBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Statistics &amp; Logs -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -142,144 +425,92 @@
             android:padding="16dp"
             android:layout_marginBottom="16dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Step 4: Configure Gmail Service"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/step4StatusText"
+                <Button
+                    android:id="@+id/viewLogsButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="View Statistics &amp; Logs"
+                    android:layout_marginEnd="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:background="@drawable/card_background"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif"
+                    android:elevation="4dp" />
+
+                <Button
+                    android:id="@+id/logsInfoButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="i"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/logsContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Configure Gmail Service"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
 
-            <Button
-                android:id="@+id/step4Button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Configure Gmail" />
+                <!-- Statistics -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Statistics"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="#FFFFFF" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/statisticsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No statistics available"
+                    android:background="@drawable/card_background"
+                    android:padding="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFF" />
 
-        <!-- Advanced Options -->
-        <Button
-            android:id="@+id/showAdvancedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Show Advanced Options"
-            android:layout_marginBottom="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                <!-- Activity Log -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Activity Log"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="#FFFFFF" />
 
-        <LinearLayout
-            android:id="@+id/advancedOptionsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="16dp">
+                <TextView
+                    android:id="@+id/logOutput"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:background="@drawable/card_background"
+                    android:padding="8dp"
+                    android:textSize="10sp"
+                    android:fontFamily="monospace"
+                    android:text=""
+                    android:scrollbars="vertical"
+                    android:scrollHorizontally="true"
+                    android:maxLines="30"
+                    android:gravity="top|start"
+                    android:textColor="#FFFFFF" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Advanced Configuration"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Email Template -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Email Template Type"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
-
-            <Spinner
-                android:id="@+id/templateSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Batch Size -->
-            <TextView
-                android:id="@+id/batchSizeText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Batch Size: 5"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
-
-            <SeekBar
-                android:id="@+id/batchSizeSeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
-
-            <!-- Delay Between Emails -->
-            <TextView
-                android:id="@+id/delayText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Delay: 1000ms"
-                android:layout_marginBottom="8dp"
-                android:textColor="@android:color/black" />
-
-            <SeekBar
-                android:id="@+id/delaySeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp" />
-
-        </LinearLayout>
-
-        <!-- Action Buttons -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Pipeline Actions"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <Button
-            android:id="@+id/runPipelineButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Complete Configuration First"
-            android:layout_marginBottom="8dp"
-            android:enabled="false" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <Button
-                android:id="@+id/testConnectionsButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Test Connections"
-                android:layout_marginEnd="8dp"
-                android:enabled="false"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
-            <Button
-                android:id="@+id/clearHistoryButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Clear History"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -297,50 +528,8 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:gravity="center"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Statistics -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Statistics"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/statisticsText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="No statistics available"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
             android:layout_marginBottom="16dp"
-            android:textColor="@android:color/black" />
-
-        <!-- Log Output -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Activity Log"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/logOutput"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="@drawable/card_background"
-            android:padding="12dp"
-            android:textSize="12sp"
-            android:fontFamily="monospace"
-            android:text=""
-            android:scrollbars="vertical"
-            android:scrollHorizontally="true"
-            android:maxLines="50"
-            android:gravity="top|start"
-            android:textColor="@android:color/black" />
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 
