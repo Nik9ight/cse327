@@ -70,6 +70,13 @@
             android:hint="Chat ID (e.g., -1001234567890)"
             android:inputType="text"
             android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/saveChatIdButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Chat ID"
+            android:layout_marginBottom="8dp" />
             
         <TextView
             android:layout_width="match_parent"
@@ -81,33 +88,14 @@
             android:layout_marginBottom="16dp" />
 
         <Button
-            android:id="@+id/findChatIdButton"
+            android:id="@+id/moreOptionsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Help me find Chat ID"
-            android:layout_marginBottom="16dp" />
-
-        <Button
-            android:id="@+id/saveChatIdButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Chat ID"
-            android:layout_marginBottom="24dp" />
-
-        <Button
-            android:id="@+id/testMessageButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send Test Message"
-            android:enabled="false" />
-            
-        <Button
-            android:id="@+id/troubleshootButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Help with Chat ID Issues"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
+            android:text="Need Help?"
+            android:layout_marginBottom="16dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:textColor="#007ACC"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"

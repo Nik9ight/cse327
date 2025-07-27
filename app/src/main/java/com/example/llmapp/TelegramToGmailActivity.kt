@@ -34,8 +34,17 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
     private lateinit var step3Button: Button
     private lateinit var step4Button: Button
     private lateinit var runPipelineButton: Button
+    private lateinit var viewLogsButton: Button
     private lateinit var testConnectionsButton: Button
     private lateinit var clearHistoryButton: Button
+    
+    // Info buttons
+    private lateinit var step1InfoButton: Button
+    private lateinit var step2InfoButton: Button
+    private lateinit var step3InfoButton: Button
+    private lateinit var step4InfoButton: Button
+    private lateinit var actionsInfoButton: Button
+    private lateinit var logsInfoButton: Button
     
     private lateinit var step1StatusText: TextView
     private lateinit var step2StatusText: TextView
@@ -49,12 +58,25 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
     
     // Advanced options
     private lateinit var advancedOptionsLayout: LinearLayout
-    private lateinit var showAdvancedButton: Button
+    
+    // Content layouts for each section
+    private lateinit var step1Content: LinearLayout
+    private lateinit var step2Content: LinearLayout
+    private lateinit var step3Content: LinearLayout
+    private lateinit var step4Content: LinearLayout
+    private lateinit var actionsContent: LinearLayout
+    private lateinit var logsContent: LinearLayout
     private lateinit var templateSpinner: Spinner
     private lateinit var batchSizeSeekBar: SeekBar
     private lateinit var batchSizeText: TextView
     private lateinit var delaySeekBar: SeekBar
     private lateinit var delayText: TextView
+    
+    // Step cards for sequential workflow
+    private lateinit var step1Card: LinearLayout
+    private lateinit var step2Card: LinearLayout
+    private lateinit var step3Card: LinearLayout
+    private lateinit var step4Card: LinearLayout
     
     // Pipeline components
     private var pipeline: TelegramToGmailPipeline? = null
@@ -112,14 +134,29 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
     }
     
     private fun initializeViews() {
+        // Step cards
+        step1Card = findViewById(R.id.step1Card)
+        step2Card = findViewById(R.id.step2Card)
+        step3Card = findViewById(R.id.step3Card)
+        step4Card = findViewById(R.id.step4Card)
+        
         // Step buttons
         step1Button = findViewById(R.id.step1Button)
         step2Button = findViewById(R.id.step2Button)
         step3Button = findViewById(R.id.step3Button)
         step4Button = findViewById(R.id.step4Button)
         
+        // Info buttons
+        step1InfoButton = findViewById(R.id.step1InfoButton)
+        step2InfoButton = findViewById(R.id.step2InfoButton)
+        step3InfoButton = findViewById(R.id.step3InfoButton)
+        step4InfoButton = findViewById(R.id.step4InfoButton)
+        actionsInfoButton = findViewById(R.id.actionsInfoButton)
+        logsInfoButton = findViewById(R.id.logsInfoButton)
+        
         // Action buttons
         runPipelineButton = findViewById(R.id.runPipelineButton)
+        viewLogsButton = findViewById(R.id.viewLogsButton)
         testConnectionsButton = findViewById(R.id.testConnectionsButton)
         clearHistoryButton = findViewById(R.id.clearHistoryButton)
         
@@ -132,12 +169,21 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
         logOutput = findViewById(R.id.logOutput)
         
         // Progress components
+        
         progressBar = findViewById(R.id.progressBar)
         statusText = findViewById(R.id.statusText)
         
         // Advanced options
         advancedOptionsLayout = findViewById(R.id.advancedOptionsLayout)
-        showAdvancedButton = findViewById(R.id.showAdvancedButton)
+        
+        // Initialize all content layouts
+        step1Content = findViewById(R.id.step1Content)
+        step2Content = findViewById(R.id.step2Content)
+        step3Content = findViewById(R.id.step3Content)
+        step4Content = findViewById(R.id.step4Content)
+        actionsContent = findViewById(R.id.actionsContent)
+        logsContent = findViewById(R.id.logsContent)
+        
         templateSpinner = findViewById(R.id.templateSpinner)
         batchSizeSeekBar = findViewById(R.id.batchSizeSeekBar)
         batchSizeText = findViewById(R.id.batchSizeText)
@@ -145,9 +191,7 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
         delayText = findViewById(R.id.delayText)
         
         setupAdvancedOptions()
-    }
-    
-    private fun setupAdvancedOptions() {
+    }    private fun setupAdvancedOptions() {
         // Template spinner
         val templateAdapter = ArrayAdapter(
             this,
@@ -207,6 +251,14 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
         step3Button.setOnClickListener { startPromptConfiguration() }
         step4Button.setOnClickListener { startGmailConfiguration() }
         
+        // Info button click listeners
+        step1InfoButton.setOnClickListener { toggleInfoContent(step1Content) }
+        step2InfoButton.setOnClickListener { toggleInfoContent(step2Content) }
+        step3InfoButton.setOnClickListener { toggleInfoContent(step3Content) }
+        step4InfoButton.setOnClickListener { toggleInfoContent(step4Content) }
+        actionsInfoButton.setOnClickListener { toggleInfoContent(actionsContent) }
+        logsInfoButton.setOnClickListener { toggleInfoContent(logsContent) }
+        
         // Primary action: run automated workflow
         runPipelineButton.setOnClickListener { runCompleteWorkflow() }
         
@@ -216,10 +268,13 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
             true
         }
         
+        viewLogsButton.setOnClickListener { 
+            // This will be handled by the info button
+            toggleInfoContent(logsContent)
+        }
+        
         testConnectionsButton.setOnClickListener { testConnections() }
         clearHistoryButton.setOnClickListener { clearHistory() }
-        
-        showAdvancedButton.setOnClickListener { toggleAdvancedOptions() }
     }
     
     private fun initializeServices() {
@@ -786,10 +841,9 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
         Toast.makeText(this, "History cleared", Toast.LENGTH_SHORT).show()
     }
     
-    private fun toggleAdvancedOptions() {
-        val isVisible = advancedOptionsLayout.visibility == View.VISIBLE
-        advancedOptionsLayout.visibility = if (isVisible) View.GONE else View.VISIBLE
-        showAdvancedButton.text = if (isVisible) "Show Advanced Options" else "Hide Advanced Options"
+    private fun toggleInfoContent(contentLayout: LinearLayout) {
+        val isVisible = contentLayout.visibility == View.VISIBLE
+        contentLayout.visibility = if (isVisible) View.GONE else View.VISIBLE
     }
     
     private fun validateConfiguration(): Boolean {
@@ -885,15 +939,32 @@ class TelegramToGmailActivity : ComponentActivity(), PipelineObserver {
     private fun updateUI() {
         // Update step statuses
         step1StatusText.text = if (step1Completed) "✓ Telegram Bot Configured" else "Configure Telegram Bot"
-        step2StatusText.text = if (step2Completed) "✓ Email Recipients Set" else "Set Email Recipients"
-        step3StatusText.text = if (step3Completed) "✓ LLM Prompt Configured" else "Configure LLM Prompt"
-        step4StatusText.text = if (step4Completed) "✓ Gmail Service Ready" else "Configure Gmail Service"
+        step2StatusText.text = if (step2Completed) "✓ Email Recipients Set" else if (!step1Completed) "Complete Step 1 first" else "Set Email Recipients"
+        step3StatusText.text = if (step3Completed) "✓ LLM Prompt Configured" else if (!step2Completed) "Complete Step 2 first" else "Configure LLM Prompt"
+        step4StatusText.text = if (step4Completed) "✓ Gmail Service Ready" else if (!step3Completed) "Complete Step 3 first" else "Configure Gmail Service"
         
-        // Update button states
-        step1Button.text = if (step1Completed) "Change Bot Token" else "Configure Telegram"
-        step2Button.text = if (step2Completed) "Change Recipients" else "Set Email Recipients"
-        step3Button.text = if (step3Completed) "Change Prompt" else "Configure Prompt"
-        step4Button.text = if (step4Completed) "Reconfigure Gmail" else "Configure Gmail"
+        // Update button states with step numbers
+        step1Button.text = if (step1Completed) "Step 1: Change Bot Token" else "Step 1: Configure Telegram"
+        step2Button.text = if (step2Completed) "Step 2: Change Recipients" else "Step 2: Set Email Recipients"
+        step3Button.text = if (step3Completed) "Step 3: Change Prompt" else "Step 3: Configure Prompt"
+        step4Button.text = if (step4Completed) "Step 4: Reconfigure Gmail" else "Step 4: Configure Gmail"
+        
+        // Sequential step availability
+        // Step 1 is always available
+        step1Card.alpha = 1.0f
+        step1Button.isEnabled = true
+        
+        // Step 2 - only available after step 1
+        step2Card.alpha = if (step1Completed) 1.0f else 0.5f
+        step2Button.isEnabled = step1Completed
+        
+        // Step 3 - only available after step 2
+        step3Card.alpha = if (step2Completed) 1.0f else 0.5f
+        step3Button.isEnabled = step2Completed
+        
+        // Step 4 - only available after step 3
+        step4Card.alpha = if (step3Completed) 1.0f else 0.5f
+        step4Button.isEnabled = step3Completed
         
         // Update pipeline button
         val allConfigured = step1Completed && step2Completed && step3Completed && step4Completed
