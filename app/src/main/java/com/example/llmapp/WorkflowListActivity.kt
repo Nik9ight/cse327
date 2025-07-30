@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.llmapp.workflow.*
+import com.example.llmapp.util.WorkflowValidationUtil
 import kotlinx.coroutines.launch
 
 class WorkflowListActivity : ComponentActivity(), WorkflowObserver {
@@ -69,6 +70,11 @@ class WorkflowListActivity : ComponentActivity(), WorkflowObserver {
     private fun initializeWorkflowManager() {
         workflowManager = WorkflowManager(this)
         workflowManager.addObserver(this)
+        
+        // Set up authentication callback for Gmail sign-in during workflow execution
+        val authCallback = WorkflowValidationUtil.createGmailAuthenticationCallback(this)
+        workflowManager.setAuthenticationCallback(authCallback)
+        Log.d(TAG, "Authentication callback set up for workflow manager")
     }
     
     private fun setupRecyclerView() {
@@ -174,6 +180,27 @@ class WorkflowListActivity : ComponentActivity(), WorkflowObserver {
             showError("Another workflow is already running. Please wait for it to complete.")
             return
         }
+        
+        // Validate workflow prerequisites before execution
+        Log.d(TAG, "Validating workflow prerequisites...")
+        val validationMessage = when (workflow.type) {
+            WorkflowType.GMAIL_TO_TELEGRAM -> {
+                val config = workflow.configuration as GmailToTelegramConfig
+                WorkflowValidationUtil.getGmailToTelegramValidationMessage(this, config)
+            }
+            WorkflowType.TELEGRAM_TO_GMAIL -> {
+                val config = workflow.configuration as TelegramToGmailConfig
+                WorkflowValidationUtil.getTelegramToGmailValidationMessage(this, config)
+            }
+        }
+        
+        if (!validationMessage.canExecute) {
+            Log.w(TAG, "Workflow validation failed: ${validationMessage.getSummary()}")
+            showValidationError(validationMessage)
+            return
+        }
+        
+        Log.d(TAG, "Workflow validation passed, proceeding with execution")
         
         // Keep screen on during workflow execution
         acquireWakeLock()
@@ -303,6 +330,55 @@ class WorkflowListActivity : ComponentActivity(), WorkflowObserver {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
     
+    private fun showValidationError(validationMessage: WorkflowValidationUtil.ValidationMessage) {
+        // Show a more detailed error message with action guidance
+        val fullMessage = StringBuilder()
+        fullMessage.append("⚠️ Cannot Execute Workflow\n\n")
+        fullMessage.append(validationMessage.getSummary())
+        
+        if (validationMessage.criticalIssues.isNotEmpty()) {
+            fullMessage.append("\n\n📋 Issues to resolve:\n")
+            validationMessage.criticalIssues.forEachIndexed { index, issue ->
+                fullMessage.append("${index + 1}. $issue\n")
+            }
+        }
+        
+        // For authentication issues, provide a direct action button
+        if (validationMessage.hasGmailAuthIssue()) {
+            fullMessage.append("\n💡 Tap 'OK' then go to Home > Sign In to authenticate Gmail")
+        }
+        
+        if (validationMessage.hasTelegramConfigIssue()) {
+            fullMessage.append("\n💡 Check your Telegram bot token and chat ID in workflow settings")
+        }
+        
+        // Use an AlertDialog for better UX with longer messages
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Workflow Validation Failed")
+            .setMessage(fullMessage.toString())
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton("OK") { _, _ ->
+                // If it's a Gmail auth issue, we could potentially navigate to sign in
+                if (validationMessage.hasGmailAuthIssue()) {
+                    Log.d(TAG, "User acknowledged Gmail authentication requirement")
+                }
+            }
+            .setNegativeButton("View Details") { _, _ ->
+                // Show the full action guidance
+                showValidationDetails(validationMessage.actionGuidance)
+            }
+            .show()
+    }
+    
+    private fun showValidationDetails(actionGuidance: String) {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Setup Instructions")
+            .setMessage(actionGuidance)
+            .setIcon(android.R.drawable.ic_dialog_info)
+            .setPositiveButton("Got it") { _, _ -> }
+            .show()
+    }
+    
     private fun acquireWakeLock() {
         try {
             val powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -405,13 +481,31 @@ class WorkflowListActivity : ComponentActivity(), WorkflowObserver {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         
+        // Handle Gmail sign-in results
+        // Check if this might be a Gmail sign-in request (RC_SIGN_IN = 9001)
+        if (requestCode == 9001) {
+            Log.d(TAG, "Received Gmail sign-in activity result: requestCode=$requestCode, resultCode=$resultCode")
+            // Create a temporary GmailService to handle the activity result
+            val gmailService = GmailService(this)
+            gmailService.handleActivityResult(requestCode, resultCode, data)
+        }
+        
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 REQUEST_CREATE_WORKFLOW, REQUEST_EDIT_WORKFLOW -> {
                     // Workflow was created or edited, reload the list
                     loadWorkflows()
                 }
+                9001 -> {
+                    // Gmail sign-in completed successfully
+                    Log.d(TAG, "Gmail sign-in completed successfully")
+                    Toast.makeText(this, "Gmail authentication completed", Toast.LENGTH_SHORT).show()
+                }
             }
+        } else if (requestCode == 9001) {
+            // Gmail sign-in was cancelled or failed
+            Log.d(TAG, "Gmail sign-in was cancelled or failed")
+            Toast.makeText(this, "Gmail sign-in cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 }

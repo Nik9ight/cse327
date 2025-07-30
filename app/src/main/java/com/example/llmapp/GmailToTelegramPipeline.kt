@@ -256,6 +256,14 @@ class GmailToTelegramPipeline(
     }
     
     /**
+     * Get the delivery service from the underlying pipeline
+     * This is needed for configuring message delivery
+     */
+    fun getDeliveryService(): MessageDeliveryService {
+        return pipeline.getDeliveryService()
+    }
+    
+    /**
      * Switch to a different service creation strategy at runtime
      * Demonstrates Strategy Pattern flexibility
      */

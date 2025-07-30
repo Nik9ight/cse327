@@ -75,6 +75,7 @@
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/spinner_background"
+            android:backgroundTint="#388E7A"
             android:padding="12dp" />
 
         <!-- Template Selection -->
@@ -93,6 +94,7 @@
             android:layout_height="48dp"
             android:layout_marginBottom="24dp"
             android:background="@drawable/spinner_background"
+            android:backgroundTint="#2D98A8"
             android:padding="12dp" />
 
         <!-- Configuration Section -->
@@ -406,7 +408,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
                 android:text="Test"
-                android:textColor="@color/white"
+                android:textColor="@color/design_default_color_primary_dark"
                 android:backgroundTint="@color/accent"
                 style="@style/Widget.MaterialComponents.Button" />
 
@@ -417,7 +419,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Create Workflow"
-                android:textColor="@color/white"
+                android:textColor="@color/design_default_color_primary_dark"
                 android:backgroundTint="@color/primary"
                 style="@style/Widget.MaterialComponents.Button" />
 
