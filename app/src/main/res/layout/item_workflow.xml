@@ -35,7 +35,7 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_workflow_24"
-                android:tint="@color/primary" />
+                app:tint="@color/primary" />
 
             <!-- Title and Type -->
             <LinearLayout
@@ -208,55 +208,55 @@
 
             <Button
                 android:id="@+id/editButton"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="8dp"
-                android:text="Edit"
-                android:textSize="12sp"
-                android:textColor="@color/secondary_text"
-                android:minWidth="64dp"
                 android:clickable="true"
                 android:focusable="true"
-                style="@style/Widget.MaterialComponents.Button.TextButton" />
+                android:minWidth="64dp"
+                android:text="Edit"
+                android:textColor="@color/secondary_text"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/duplicateButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="Copy"
-                android:textSize="12sp"
-                android:textColor="@color/secondary_text"
-                android:minWidth="64dp"
                 android:clickable="true"
                 android:focusable="true"
-                style="@style/Widget.MaterialComponents.Button.TextButton" />
+                android:minWidth="64dp"
+                android:text="Copy"
+                android:textColor="@color/secondary_text"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/deleteButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="Delete"
-                android:textSize="12sp"
-                android:textColor="@color/error"
-                android:minWidth="64dp"
                 android:clickable="true"
                 android:focusable="true"
-                style="@style/Widget.MaterialComponents.Button.TextButton" />
+                android:minWidth="64dp"
+                android:text="Delete"
+                android:textColor="@color/error"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/runButton"
-                android:layout_width="wrap_content"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="80dp"
                 android:layout_height="36dp"
-                android:text="Run"
-                android:textSize="12sp"
-                android:textColor="@color/white"
                 android:backgroundTint="@color/primary"
-                android:minWidth="64dp"
                 android:clickable="true"
                 android:focusable="true"
-                style="@style/Widget.MaterialComponents.Button" />
+                android:minWidth="64dp"
+                android:text="Run"
+                android:textColor="@color/design_default_color_primary"
+                android:textSize="12sp" />
 
         </LinearLayout>
 

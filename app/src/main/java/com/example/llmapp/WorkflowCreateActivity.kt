@@ -174,6 +174,128 @@ class WorkflowCreateActivity : ComponentActivity() {
         setupValidation()
     }
     
+    private fun isValidGmailSearchQuery(query: String): Boolean {
+        if (query.isBlank()) return true // Allow empty for default behavior
+        
+        // Common Gmail search operators
+        val validOperators = listOf(
+            "from:", "to:", "subject:", "has:", "is:", "in:", "cc:", "bcc:",
+            "filename:", "label:", "category:", "before:", "after:", "older:",
+            "newer:", "larger:", "smaller:", "size:", "deliveredto:"
+        )
+        
+        // Check for basic Gmail search syntax
+        val cleanQuery = query.trim().lowercase()
+        
+        // Allow simple text searches
+        if (!cleanQuery.contains(":")) return true
+        
+        // Check if it contains valid operators
+        val hasValidOperator = validOperators.any { operator ->
+            cleanQuery.contains(operator)
+        }
+        
+        // Check for common invalid patterns
+        val invalidPatterns = listOf(
+            ":::", // Multiple colons
+            "::", // Double colons
+            "from:from:", // Duplicate operators
+            "to:to:", // Duplicate operators
+        )
+        
+        val hasInvalidPattern = invalidPatterns.any { pattern ->
+            cleanQuery.contains(pattern)
+        }
+        
+        // Additional validation for specific operators
+        val isValidSpecificFormat = when {
+            cleanQuery.contains("is:") -> {
+                val validIsValues = listOf("unread", "read", "starred", "important", "spam", "trash", "sent")
+                val isValues = extractOperatorValues(cleanQuery, "is:")
+                isValues.all { it in validIsValues }
+            }
+            cleanQuery.contains("has:") -> {
+                val validHasValues = listOf("attachment", "drive", "document", "spreadsheet", "presentation", "pdf", "youtube")
+                val hasValues = extractOperatorValues(cleanQuery, "has:")
+                hasValues.all { it in validHasValues }
+            }
+            cleanQuery.contains("in:") -> {
+                val validInValues = listOf("inbox", "sent", "spam", "trash", "drafts", "important", "starred", "chats")
+                val inValues = extractOperatorValues(cleanQuery, "in:")
+                inValues.all { it in validInValues }
+            }
+            else -> true
+        }
+        
+        return hasValidOperator && !hasInvalidPattern && isValidSpecificFormat
+    }
+    
+    private fun extractOperatorValues(query: String, operator: String): List<String> {
+        val pattern = "$operator(\\S+)".toRegex()
+        return pattern.findAll(query).map { it.groupValues[1] }.toList()
+    }
+    
+    private fun getGmailSearchQueryError(query: String): String? {
+        if (query.isBlank()) return null
+        
+        val cleanQuery = query.trim().lowercase()
+        
+        // Check for invalid patterns
+        when {
+            cleanQuery.contains(":::") -> return "Invalid syntax: Too many colons (:::)"
+            cleanQuery.contains("::") -> return "Invalid syntax: Double colons (::)"
+            cleanQuery.contains("from:from:") -> return "Invalid syntax: Duplicate 'from:' operator"
+            cleanQuery.contains("to:to:") -> return "Invalid syntax: Duplicate 'to:' operator"
+        }
+        
+        // Check for valid operators if colons are present
+        if (cleanQuery.contains(":")) {
+            val validOperators = listOf(
+                "from:", "to:", "subject:", "has:", "is:", "in:", "cc:", "bcc:",
+                "filename:", "label:", "category:", "before:", "after:", "older:",
+                "newer:", "larger:", "smaller:", "size:", "deliveredto:"
+            )
+            
+            val hasValidOperator = validOperators.any { operator ->
+                cleanQuery.contains(operator)
+            }
+            
+            if (!hasValidOperator) {
+                return "Invalid Gmail search operator. Use operators like: from:, to:, subject:, is:, has:, in:, etc."
+            }
+        }
+        
+        // Validate specific operator values
+        when {
+            cleanQuery.contains("is:") -> {
+                val validIsValues = listOf("unread", "read", "starred", "important", "spam", "trash", "sent")
+                val isValues = extractOperatorValues(cleanQuery, "is:")
+                val invalidValues = isValues.filter { it !in validIsValues }
+                if (invalidValues.isNotEmpty()) {
+                    return "Invalid 'is:' values: ${invalidValues.joinToString(", ")}. Valid values: ${validIsValues.joinToString(", ")}"
+                }
+            }
+            cleanQuery.contains("has:") -> {
+                val validHasValues = listOf("attachment", "drive", "document", "spreadsheet", "presentation", "pdf", "youtube")
+                val hasValues = extractOperatorValues(cleanQuery, "has:")
+                val invalidValues = hasValues.filter { it !in validHasValues }
+                if (invalidValues.isNotEmpty()) {
+                    return "Invalid 'has:' values: ${invalidValues.joinToString(", ")}. Valid values: ${validHasValues.joinToString(", ")}"
+                }
+            }
+            cleanQuery.contains("in:") -> {
+                val validInValues = listOf("inbox", "sent", "spam", "trash", "drafts", "important", "starred", "chats")
+                val inValues = extractOperatorValues(cleanQuery, "in:")
+                val invalidValues = inValues.filter { it !in validInValues }
+                if (invalidValues.isNotEmpty()) {
+                    return "Invalid 'in:' values: ${invalidValues.joinToString(", ")}. Valid values: ${validInValues.joinToString(", ")}"
+                }
+            }
+        }
+        
+        return null
+    }
+    
     private fun setupValidation() {
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -184,6 +306,7 @@ class WorkflowCreateActivity : ComponentActivity() {
         }
         
         nameInput.addTextChangedListener(textWatcher)
+        gmailSearchQueryInput.addTextChangedListener(textWatcher)
         telegramBotTokenInput.addTextChangedListener(textWatcher)
         telegramChatIdInput.addTextChangedListener(textWatcher)
         telegramBotTokenInput2.addTextChangedListener(textWatcher)
@@ -298,7 +421,10 @@ class WorkflowCreateActivity : ComponentActivity() {
         val isValid = when {
             nameInput.text.isBlank() -> false
             selectedWorkflowType == WorkflowType.GMAIL_TO_TELEGRAM -> {
-                telegramBotTokenInput.text.isNotBlank() && telegramChatIdInput.text.isNotBlank()
+                val searchQueryValid = isValidGmailSearchQuery(gmailSearchQueryInput.text.toString())
+                searchQueryValid && 
+                telegramBotTokenInput.text.isNotBlank() && 
+                telegramChatIdInput.text.isNotBlank()
             }
             selectedWorkflowType == WorkflowType.TELEGRAM_TO_GMAIL -> {
                 telegramBotTokenInput2.text.isNotBlank() && 
@@ -311,6 +437,15 @@ class WorkflowCreateActivity : ComponentActivity() {
         
         saveButton.isEnabled = isValid
         testButton.isEnabled = isValid
+        
+        // Show Gmail search query error if present
+        if (selectedWorkflowType == WorkflowType.GMAIL_TO_TELEGRAM) {
+            val searchQueryError = getGmailSearchQueryError(gmailSearchQueryInput.text.toString())
+            if (searchQueryError != null) {
+                // You can show this error in a TextView or as a tooltip
+                Log.w(TAG, "Gmail search query validation error: $searchQueryError")
+            }
+        }
         
         return isValid
     }
@@ -351,6 +486,15 @@ class WorkflowCreateActivity : ComponentActivity() {
         if (!validateForm()) {
             showError("Please fill in all required fields")
             return
+        }
+        
+        // Additional Gmail search query validation for detailed error reporting
+        if (selectedWorkflowType == WorkflowType.GMAIL_TO_TELEGRAM) {
+            val searchQueryError = getGmailSearchQueryError(gmailSearchQueryInput.text.toString())
+            if (searchQueryError != null) {
+                showError("Gmail Search Query Error:\n$searchQueryError\n\nExamples of valid queries:\n• is:unread\n• from:example@email.com\n• subject:important\n• has:attachment")
+                return
+            }
         }
         
         val configuration = createConfiguration()
@@ -408,6 +552,15 @@ class WorkflowCreateActivity : ComponentActivity() {
         if (!validateForm()) {
             showError("Please fill in all required fields before testing")
             return
+        }
+        
+        // Additional Gmail search query validation for testing
+        if (selectedWorkflowType == WorkflowType.GMAIL_TO_TELEGRAM) {
+            val searchQueryError = getGmailSearchQueryError(gmailSearchQueryInput.text.toString())
+            if (searchQueryError != null) {
+                showError("Gmail Search Query Error:\n$searchQueryError\n\nExamples of valid queries:\n• is:unread\n• from:example@email.com\n• subject:important\n• has:attachment")
+                return
+            }
         }
         
         showProgress("Testing workflow configuration...")

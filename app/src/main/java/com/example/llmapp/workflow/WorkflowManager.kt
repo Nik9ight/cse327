@@ -30,6 +30,13 @@ class WorkflowManager(
     private var runningWorkflow: String? = null
     
     /**
+     * Set authentication callback for workflow authentication requests
+     */
+    fun setAuthenticationCallback(callback: GmailToTelegramWorkflowPipeline.AuthenticationCallback?) {
+        factory.setAuthenticationCallback(callback)
+    }
+    
+    /**
      * Create a new workflow
      */
     suspend fun createWorkflow(

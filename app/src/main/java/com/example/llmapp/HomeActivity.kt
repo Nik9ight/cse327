@@ -48,8 +48,20 @@ class HomeActivity : ComponentActivity() {
         val llmButton = findViewById<Button>(R.id.llmButton)
 
         signInButton.setOnClickListener {
-            login.signIn()
+            if (login.isSignedIn()) {
+                // Sign out
+                login.signOut {
+                    Toast.makeText(this, "Signed out successfully", Toast.LENGTH_SHORT).show()
+                    updateSignInButtonState()
+                }
+            } else {
+                // Sign in
+                login.signIn()
+            }
         }
+        
+        // Initial button state update
+        updateSignInButtonState()
         
         enablePermissionsButton.setOnClickListener {
             if (!permissions.hasPermissions(requiredPermissions)) {
@@ -69,6 +81,22 @@ class HomeActivity : ComponentActivity() {
         
         llmButton.setOnClickListener { view ->
             showLLMMenu(view)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Update button state when returning to the activity
+        updateSignInButtonState()
+    }
+
+    private fun updateSignInButtonState() {
+        val signInButton = findViewById<Button>(R.id.signInButton)
+        
+        if (login.isSignedIn()) {
+            signInButton.text = "SIGN OUT"
+        } else {
+            signInButton.text = "SIGN IN WITH GOOGLE"
         }
     }
 
@@ -120,9 +148,11 @@ class HomeActivity : ComponentActivity() {
             login.handleSignInResult(data,
                 onSuccess = { account: GoogleSignInAccount ->
                     Toast.makeText(this, "Signed in as: ${account.displayName}", Toast.LENGTH_SHORT).show()
+                    updateSignInButtonState()
                 },
                 onError = { errorMsg ->
                     Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show()
+                    updateSignInButtonState()
                 }
             )
         }

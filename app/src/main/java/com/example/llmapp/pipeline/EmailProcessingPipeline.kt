@@ -44,6 +44,12 @@ class EmailProcessingPipeline(
      */
     fun getContentProcessor(): ContentProcessor = contentProcessor
     
+    /**
+     * Get the delivery service instance
+     * This is needed for sending messages
+     */
+    fun getDeliveryService(): MessageDeliveryService = deliveryService
+    
     // Event management
     private val eventManager = PipelineEventManager()
     
