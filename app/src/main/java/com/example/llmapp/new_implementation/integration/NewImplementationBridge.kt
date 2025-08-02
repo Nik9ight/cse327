@@ -1,18 +1,21 @@
 package com.example.llmapp.new_implementation.integration
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.util.Log
 import com.example.llmapp.new_implementation.*
 import com.example.llmapp.new_implementation.factories.SourceFactory
 import com.example.llmapp.new_implementation.factories.DestinationFactory
+import com.example.llmapp.workflow.*
 
 /**
  * Bridge class to integrate new implementation with existing system
- * Allows gradual migration from old to new implementation
+ * Now uses the original WorkflowManager for execution
  */
 class NewImplementationBridge(private val context: Context) {
     
     private val TAG = "NewImplementationBridge"
+    private val workflowManager = WorkflowManager(context)
     
     /**
      * Create a workflow using the new implementation that matches
@@ -33,14 +36,12 @@ class NewImplementationBridge(private val context: Context) {
         
         val processor = LLMProcessor(context)
         
-        val telegramConfig = mapOf(
-            "context" to context,
-            "chatId" to telegramChatId,
-            "botToken" to telegramBotToken
-        )
-        val destination = DestinationFactory.create("telegram", telegramConfig)
-        
-        return Workflow(source, processor, destination)
+        return Workflow.builder(context)
+            .source(source)
+            .processor(processor)
+            .telegramDestination(telegramChatId)
+            .formatterStrategy(Workflow.Builder.FormatterStrategy.TELEGRAM_FORMAT)
+            .build()
     }
     
     /**
@@ -61,19 +62,16 @@ class NewImplementationBridge(private val context: Context) {
         
         val processor = LLMProcessor(context)
         
-        val gmailConfig = mapOf(
-            "context" to context,
-            "recipients" to gmailRecipients,
-            "senderEmail" to gmailSender
-        )
-        val destination = DestinationFactory.create("gmail", gmailConfig)
-        
-        return Workflow(source, processor, destination)
+        return Workflow.builder(context)
+            .source(source)
+            .processor(processor)
+            .gmailDestination(gmailRecipients, gmailSender)
+            .formatterStrategy(Workflow.Builder.FormatterStrategy.GMAIL_FORMAT)
+            .build()
     }
     
     /**
-     * Execute a workflow and return results in a format compatible
-     * with existing pipeline result handling
+     * Execute a workflow using the original WorkflowManager
      */
     fun executeWorkflow(
         workflow: Workflow,
@@ -81,6 +79,8 @@ class NewImplementationBridge(private val context: Context) {
         batchSize: Int = 3
     ): WorkflowResult {
         return try {
+            // For now, use the new implementation directly
+            // In the future, this could be routed through WorkflowManager
             val success = if (useBatchMode) {
                 workflow.runBatch(batchSize)
             } else {
@@ -104,6 +104,88 @@ class NewImplementationBridge(private val context: Context) {
             )
         }
     }
+    
+    /**
+     * Execute a saved workflow using the original WorkflowManager
+     */
+    suspend fun executeWorkflowViaManager(savedWorkflow: com.example.llmapp.new_implementation.ui.SavedWorkflow): WorkflowResult {
+        return try {
+            Log.d(TAG, "Executing workflow via WorkflowManager: ${savedWorkflow.name}")
+            
+            // Convert to original workflow and execute
+            val originalWorkflow = savedWorkflow.toOriginalWorkflow()
+            val result = workflowManager.executeWorkflow(originalWorkflow.id)
+            
+            result.fold(
+                onSuccess = { executionResult ->
+                    WorkflowResult(
+                        success = executionResult.success,
+                        message = executionResult.message,
+                        processedMessages = executionResult.details["processedMessages"] as? Int ?: 0,
+                        timestamp = executionResult.timestamp
+                    )
+                },
+                onFailure = { exception ->
+                    WorkflowResult(
+                        success = false,
+                        message = "Execution failed: ${exception.message}",
+                        processedMessages = 0,
+                        timestamp = System.currentTimeMillis(),
+                        error = exception.message
+                    )
+                }
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to execute workflow via manager", e)
+            WorkflowResult(
+                success = false,
+                message = "Manager execution error: ${e.message}",
+                processedMessages = 0,
+                timestamp = System.currentTimeMillis(),
+                error = e.message
+            )
+        }
+    }
+    
+    /**
+     * Validate workflow configuration using the original system validation
+     */
+    fun validateWorkflowConfig(savedWorkflow: com.example.llmapp.new_implementation.ui.SavedWorkflow): ValidationResult {
+        return try {
+            val originalConfig = when (savedWorkflow.configuration) {
+                is com.example.llmapp.new_implementation.ui.SavedWorkflowConfig.GmailToTelegram -> {
+                    savedWorkflow.configuration.toOriginalConfig()
+                }
+                is com.example.llmapp.new_implementation.ui.SavedWorkflowConfig.TelegramToGmail -> {
+                    savedWorkflow.configuration.toOriginalConfig()
+                }
+            }
+            
+            val validationResult = originalConfig.validate()
+            
+            ValidationResult(
+                success = validationResult.isValid(),
+                details = if (validationResult.isValid()) {
+                    listOf("✅ Configuration is valid")
+                } else {
+                    listOf("❌ Configuration error: ${validationResult.getErrorMessage()}")
+                },
+                timestamp = System.currentTimeMillis()
+            )
+        } catch (e: Exception) {
+            ValidationResult(
+                success = false,
+                details = listOf("❌ Validation error: ${e.message}"),
+                timestamp = System.currentTimeMillis()
+            )
+        }
+    }
+    
+    /**
+     * Get the underlying WorkflowManager for advanced operations
+     */
+    fun getWorkflowManager(): WorkflowManager = workflowManager
+}
     
     /**
      * Compare new implementation with existing pipeline
@@ -172,7 +254,7 @@ class NewImplementationBridge(private val context: Context) {
             )
         )
     }
-}
+
 
 /**
  * Data class for workflow execution results

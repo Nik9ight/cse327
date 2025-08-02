@@ -1,3 +1,5 @@
+package com.example.llmapp.new_implementation.interfaces
+
 import com.example.llmapp.new_implementation.Message
 
 interface OutputFormatter {

@@ -2,6 +2,7 @@ package com.example.llmapp.new_implementation
 
 import com.example.llmapp.new_implementation.interfaces.MessageSource
 import com.example.llmapp.adapters.TelegramSourceAdapter
+import com.example.llmapp.pipeline.TelegramMessage
 import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,7 +22,7 @@ class TelegramSource(private val config: Map<String, Any> = emptyMap()) : Messag
     
     override fun fetchMessage(): Message {
         return try {
-            val telegramMessages = telegramAdapter.getUpdates(limit = 1)
+            val telegramMessages = telegramAdapter.getRecentMessages(limit = 1)
             if (telegramMessages.isNotEmpty()) {
                 convertToStandardMessage(telegramMessages.first())
             } else {
@@ -35,7 +36,7 @@ class TelegramSource(private val config: Map<String, Any> = emptyMap()) : Messag
     
     override fun fetchMessages(count: Int): List<Message> {
         return try {
-            val telegramMessages = telegramAdapter.getUpdates(limit = count)
+            val telegramMessages = telegramAdapter.getRecentMessages(limit = count)
             telegramMessages.map { convertToStandardMessage(it) }
         } catch (e: Exception) {
             Log.e("TelegramSource", "Failed to fetch messages", e)
@@ -43,18 +44,18 @@ class TelegramSource(private val config: Map<String, Any> = emptyMap()) : Messag
         }
     }
     
-    private fun convertToStandardMessage(telegramMessage: com.example.llmapp.adapters.TelegramMessage): Message {
+    private fun convertToStandardMessage(sourceMessage: com.example.llmapp.interfaces.MessageSourceService.SourceMessage): Message {
         return Message(
-            id = telegramMessage.id,
-            sender = telegramMessage.senderName,
-            recipient = telegramMessage.metadata["chat_id"] ?: "unknown",
-            content = telegramMessage.content,
-            timestamp = parseTimestamp(telegramMessage.timestamp),
+            id = sourceMessage.id,
+            sender = sourceMessage.metadata["sender_name"] ?: "unknown",
+            recipient = sourceMessage.metadata["chat_id"] ?: "unknown",
+            content = sourceMessage.content,
+            timestamp = parseTimestamp(sourceMessage.metadata["original_timestamp"] ?: ""),
             metadata = mapOf(
                 "platform" to "telegram",
-                "chat_type" to telegramMessage.chatType,
-                "original_timestamp" to telegramMessage.timestamp
-            ) + telegramMessage.metadata
+                "chat_type" to (sourceMessage.metadata["chat_type"] ?: "unknown"),
+                "original_timestamp" to (sourceMessage.metadata["original_timestamp"] ?: "")
+            ) + sourceMessage.metadata
         )
     }
     

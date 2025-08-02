@@ -48,7 +48,7 @@ class GmailSource(private val config: Map<String, Any> = emptyMap()) : MessageSo
     private fun fetchGmailMessages(count: Int): List<Message> {
         val messages = mutableListOf<Message>()
         
-        gmailAdapter?.fetchMessagesByQuery(
+        gmailAdapter?.searchMessages(
             query = searchQuery,
             count = count,
             onSuccess = { sourceMessages ->

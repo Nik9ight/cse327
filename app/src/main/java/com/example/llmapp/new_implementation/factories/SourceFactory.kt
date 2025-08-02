@@ -5,7 +5,7 @@ import com.example.llmapp.new_implementation.GmailSource
 import com.example.llmapp.new_implementation.TelegramSource
 
 /**
- * Factory Pattern for creating MessageSource instances
+ * Factory Pattern for creating com.example.llmapp.new_implementation.interfaces.MessageSource instances
  * As discussed in the ChatGPT conversation
  */
 object SourceFactory {
