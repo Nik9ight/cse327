@@ -19,7 +19,8 @@ class LLMProcessor(private val context: Context) : Processor {
     
     override fun process(message: Message): Message {
         return try {
-            val processedContent = processWithLLM(message.content, message.metadata["platform"] ?: "unknown")
+            val platform = message.metadata["platform"] as? String ?: "unknown"
+            val processedContent = processWithLLM(message.content, platform)
             
             message.copy(
                 content = processedContent,
@@ -47,7 +48,8 @@ class LLMProcessor(private val context: Context) : Processor {
             
             // Combine messages as discussed in ChatGPT conversation
             val combinedContent = combineMessages(messages)
-            val batchPrompt = createBatchPrompt(combinedContent, messages.first().metadata["platform"] ?: "unknown")
+            val platform = messages.first().metadata["platform"] as? String ?: "unknown"
+            val batchPrompt = createBatchPrompt(combinedContent, platform)
             val processedContent = processWithLLM(batchPrompt, "batch")
             
             // Create a new consolidated message
@@ -61,7 +63,7 @@ class LLMProcessor(private val context: Context) : Processor {
                     "processed" to "true",
                     "processor" to "llm_batch",
                     "original_message_count" to messages.size.toString(),
-                    "platform" to messages.first().metadata["platform"] ?: "unknown",
+                    "platform" to platform,
                     "batch_processed" to "true"
                 )
             )

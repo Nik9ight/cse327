@@ -30,8 +30,8 @@ data class Message(
 ```
 
 #### 2. Interfaces
-- `MessageSource`: Fetch messages from sources
-- `MessageDestination`: Send messages to destinations  
+- `com.example.llmapp.new_implementation.interfaces.MessageSource`: Fetch messages from sources
+- `com.example.llmapp.new_implementation.interfaces.MessageDestination`: Send messages to destinations  
 - `Processor`: Process messages with LLM
 - `OutputFormatter`: Format messages for specific platforms
 
@@ -212,8 +212,8 @@ new_implementation/
 ├── Workflow.kt                   # Main workflow orchestrator
 ├── LLMProcessor.kt              # LLM processing implementation
 ├── interfaces/
-│   ├── MessageSource.kt         # Source interface
-│   ├── MessageDestination.kt    # Destination interface
+│   ├── com.example.llmapp.new_implementation.interfaces.MessageSource.kt         # Source interface
+│   ├── com.example.llmapp.new_implementation.interfaces.MessageDestination.kt    # Destination interface
 │   ├── Processor.kt             # Processor interface
 │   └── OutputFormatter.kt       # Formatter interface
 ├── factories/

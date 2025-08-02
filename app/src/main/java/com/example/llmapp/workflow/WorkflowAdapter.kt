@@ -61,12 +61,12 @@ class WorkflowAdapter(
         val previousRunning = runningWorkflowId
         runningWorkflowId = workflowId
         
-        Log.d("WorkflowAdapter", "setRunningWorkflowId called - previous: $previousRunning, new: $workflowId")
+        Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "setRunningWorkflowId called - previous: $previousRunning, new: $workflowId")
         
         // Refresh the previously running item
         previousRunning?.let { prevId ->
             workflows.indexOfFirst { it.id == prevId }.takeIf { it >= 0 }?.let {
-                Log.d("WorkflowAdapter", "Refreshing previously running item at position: $it")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Refreshing previously running item at position: $it")
                 notifyItemChanged(it)
             }
         }
@@ -74,17 +74,17 @@ class WorkflowAdapter(
         // Refresh the newly running item
         workflowId?.let { newId ->
             workflows.indexOfFirst { it.id == newId }.takeIf { it >= 0 }?.let {
-                Log.d("WorkflowAdapter", "Refreshing newly running item at position: $it")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Refreshing newly running item at position: $it")
                 notifyItemChanged(it)
             }
         }
         
         // If no specific workflow is running/stopping, refresh all items
         if (previousRunning == null && workflowId != null) {
-            Log.d("WorkflowAdapter", "Starting workflow execution, refreshing all items")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Starting workflow execution, refreshing all items")
             notifyDataSetChanged()
         } else if (previousRunning != null && workflowId == null) {
-            Log.d("WorkflowAdapter", "Workflow execution completed, refreshing all items")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Workflow execution completed, refreshing all items")
             notifyDataSetChanged()
         }
     }
@@ -108,7 +108,7 @@ class WorkflowAdapter(
             typeText.text = workflow.type.getDisplayName()
             descriptionText.text = workflow.description.ifBlank { workflow.type.getDescription() }
             
-            Log.d("WorkflowAdapter", "Binding workflow: ${workflow.name}, enabled: ${workflow.isEnabled}")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Binding workflow: ${workflow.name}, enabled: ${workflow.isEnabled}")
             
             // Set workflow icon and type icon
             val iconRes = when (workflow.type) {
@@ -119,12 +119,12 @@ class WorkflowAdapter(
             
             // Set status badge
             val isRunning = workflow.id == runningWorkflowId
-            Log.d("WorkflowAdapter", "Binding ${workflow.name}: runningWorkflowId=$runningWorkflowId, isRunning=$isRunning")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Binding ${workflow.name}: runningWorkflowId=$runningWorkflowId, isRunning=$isRunning")
             
             if (isRunning) {
                 statusBadge.text = "Running..."
                 statusBadge.setBackgroundColor(itemView.context.getColor(R.color.running))
-                Log.d("WorkflowAdapter", "Set status badge to 'Running...' for ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Set status badge to 'Running...' for ${workflow.name}")
             } else {
                 statusBadge.text = if (workflow.isEnabled) "Active" else "Disabled"
                 statusBadge.setBackgroundColor(
@@ -134,7 +134,7 @@ class WorkflowAdapter(
                         itemView.context.getColor(R.color.status_disabled)
                     }
                 )
-                Log.d("WorkflowAdapter", "Set status badge to '${statusBadge.text}' for ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Set status badge to '${statusBadge.text}' for ${workflow.name}")
             }
             
             // Highlight selected item
@@ -149,28 +149,28 @@ class WorkflowAdapter(
             
             // Set click listener on header area only
             headerClickableArea.setOnClickListener {
-                Log.d("WorkflowAdapter", "Header area clicked for workflow: ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Header area clicked for workflow: ${workflow.name}")
                 onWorkflowClick(workflow)
             }
             
             // Set up action button click listeners
             runButton.setOnClickListener {
-                Log.d("WorkflowAdapter", "Run button clicked for workflow: ${workflow.name} (ID: ${workflow.id})")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Run button clicked for workflow: ${workflow.name} (ID: ${workflow.id})")
                 onRunClick(workflow)
             }
             
             editButton.setOnClickListener {
-                Log.d("WorkflowAdapter", "Edit button clicked for workflow: ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Edit button clicked for workflow: ${workflow.name}")
                 onEditClick(workflow)
             }
             
             deleteButton.setOnClickListener {
-                Log.d("WorkflowAdapter", "Delete button clicked for workflow: ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Delete button clicked for workflow: ${workflow.name}")
                 onDeleteClick(workflow)
             }
             
             duplicateButton.setOnClickListener {
-                Log.d("WorkflowAdapter", "Duplicate button clicked for workflow: ${workflow.name}")
+                Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Duplicate button clicked for workflow: ${workflow.name}")
                 onDuplicateClick(workflow)
             }
             
@@ -181,7 +181,7 @@ class WorkflowAdapter(
             runButton.text = if (isRunning) "Running..." else "Run"
             runButton.alpha = if (runButton.isEnabled) 1.0f else 0.5f
             
-            Log.d("WorkflowAdapter", "Button states for ${workflow.name}: runEnabled=${runButton.isEnabled}, text='${runButton.text}', isAnotherRunning=$isAnotherWorkflowRunning")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Button states for ${workflow.name}: runEnabled=${runButton.isEnabled}, text='${runButton.text}', isAnotherRunning=$isAnotherWorkflowRunning")
             
             // Disable all buttons when any workflow is running
             editButton.isEnabled = !isAnotherWorkflowRunning && !isRunning
@@ -192,7 +192,7 @@ class WorkflowAdapter(
             deleteButton.alpha = if (deleteButton.isEnabled) 1.0f else 0.5f
             duplicateButton.alpha = if (duplicateButton.isEnabled) 1.0f else 0.5f
             
-            Log.d("WorkflowAdapter", "Run button enabled: ${runButton.isEnabled}, visible: ${runButton.visibility == View.VISIBLE}, running: $isRunning")
+            Log.d("com.example.llmapp.new_implementation.ui.WorkflowAdapter", "Run button enabled: ${runButton.isEnabled}, visible: ${runButton.visibility == View.VISIBLE}, running: $isRunning")
             
             // Ensure buttons are visible
             runButton.visibility = View.VISIBLE

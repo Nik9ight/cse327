@@ -1,35 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:padding="32dp"
     android:background="@drawable/app_background_charcoal">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="48dp">
+    <!-- Exit Icon in top-right corner -->
+    <ImageView
+        android:id="@+id/exitIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_exit"
+        android:background="@drawable/exit_icon_background"
+        android:contentDescription="Exit App"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true" />
 
-        <TextView
-            android:id="@+id/homeTitle"
+    <!-- Main content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:layout_below="@id/exitIcon">
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Welcome to LLMAPP"
-            style="@style/WelcomeTextStyle"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="48dp">
 
-        <ImageView
-            android:id="@+id/blinkingDot"
-            android:layout_width="12dp"
-            android:layout_height="12dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="2dp"
-            android:src="@drawable/blinking_dot"/>
+            <TextView
+                android:id="@+id/homeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome to LLMAPP"
+                style="@style/WelcomeTextStyle"/>
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/blinkingDot"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/blinking_dot"/>
+
+        </LinearLayout>
 
     <Button
         android:id="@+id/signInButton"
@@ -63,13 +84,25 @@
         style="@style/LLMAPPButtonStyle"/>
 
     <Button
-        android:id="@+id/llmButton"
+        android:id="@+id/newWorkflowsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="LLM AND MULTIMODELS"
+        android:text="NEW WORKFLOWS (Enhanced)"
         android:drawableEnd="@drawable/dropdown_arrow_selector"
         android:drawablePadding="12dp"
         android:gravity="center"
         style="@style/LLMAPPButtonStyle"/>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/llmButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LLM AND MULTIMODELS"
+            android:drawableEnd="@drawable/dropdown_arrow_selector"
+            android:drawablePadding="12dp"
+            android:gravity="center"
+            style="@style/LLMAPPButtonStyle"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
