@@ -88,9 +88,12 @@ Thumbs.db
 # App specific 
 app/release/
 
-# Optional: Exclude sensitive files like API keys or secrets
-# *.jks
-# *.keystore
-# *.p12
-# *.pem
-# secret.properties
+# API Keys and Sensitive Files - NEVER COMMIT THESE
+google-services.json
+*.jks
+*.keystore
+*.p12
+*.pem
+secret.properties
+*api*key*
+*secret*

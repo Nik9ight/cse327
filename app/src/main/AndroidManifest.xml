@@ -50,8 +50,8 @@
         <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDYf6fLUWfosjXnrC6FXUO6Y6_cTOXHZU8" />
-            <!-- Replace YOUR_ACTUAL_API_KEY_HERE with your Google Maps API key -->
+            android:value="${GOOGLE_MAPS_API_KEY}" />
+            <!-- API key is now securely stored in local.properties -->
             
         <activity android:name=".HomeActivity" android:exported="true">
             <intent-filter>
