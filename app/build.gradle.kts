@@ -105,6 +105,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.gms:play-services-auth:21.3.0") // Using newer version only
+    implementation("com.google.android.gms:play-services-maps:18.2.0") // Google Maps SDK
+    implementation("com.google.android.gms:play-services-location:21.0.1") // Location services for geofencing
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.squareup.okhttp3:okhttp:4.12.0") // OkHttp for network requests (Telegram API)

@@ -74,6 +74,7 @@
         android:drawableEnd="@drawable/dropdown_arrow_selector"
         android:drawablePadding="12dp"
         android:gravity="center"
+        android:visibility="gone"
         style="@style/LLMAPPButtonStyle"/>
 
     <Button
@@ -81,27 +82,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="YOUR WORKFLOWS"
+        android:visibility="gone"
         style="@style/LLMAPPButtonStyle"/>
 
     <Button
         android:id="@+id/newWorkflowsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="NEW WORKFLOWS (Enhanced)"
+        android:text="WORKFLOWS 2.0"
         android:drawableEnd="@drawable/dropdown_arrow_selector"
         android:drawablePadding="12dp"
         android:gravity="center"
         style="@style/LLMAPPButtonStyle"/>
 
         <Button
-            android:id="@+id/llmButton"
+            android:id="@+id/geofenceButton"
+            style="@style/LLMAPPButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="LLM AND MULTIMODELS"
+            android:gravity="center"
+            android:text="📍 GEOFENCE MANAGER" />
+
+        <Button
+            android:id="@+id/llmButton"
+            style="@style/LLMAPPButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:drawableEnd="@drawable/dropdown_arrow_selector"
             android:drawablePadding="12dp"
             android:gravity="center"
-            style="@style/LLMAPPButtonStyle"/>
+            android:text="LLM CHATS" />
+
+
 
     </LinearLayout>
 

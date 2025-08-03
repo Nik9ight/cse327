@@ -133,6 +133,12 @@ class TelegramService(private val context: Context) {
     fun getChatId(): String? {
         return chatId
     }
+    
+    // Save bot token
+    fun saveBotToken(token: String) {
+        botToken = token
+        saveCredentials()
+    }
 
     // Send message to chat
     fun sendMessage(text: String, onSuccess: () -> Unit, onError: (String) -> Unit) {

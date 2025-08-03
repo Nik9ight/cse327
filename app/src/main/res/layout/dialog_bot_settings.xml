@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#333333">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🤖 Bot Configuration"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Bot Token -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:boxBackgroundColor="#444444"
+        app:hintTextColor="@android:color/white">
+
+        <EditText
+            android:id="@+id/etBotToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Telegram Bot Token"
+            android:inputType="textPassword"
+            android:textColor="@android:color/white"
+            android:textColorHint="#AAAAAA" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Default Chat ID -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:boxBackgroundColor="#444444"
+        app:hintTextColor="@android:color/white">
+
+        <EditText
+            android:id="@+id/etDefaultChatId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Default Chat ID"
+            android:textColor="@android:color/white"
+            android:textColorHint="#AAAAAA" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Help Text -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 To get your bot token:\n1. Message @BotFather on Telegram\n2. Create a new bot with /newbot\n3. Copy the token provided\n\n📋 To get your chat ID:\n1. Message your bot\n2. Visit: https://api.telegram.org/bot[TOKEN]/getUpdates\n3. Find your chat ID in the response"
+        android:textSize="12sp"
+        android:textColor="#CCCCCC"
+        android:layout_marginBottom="24dp"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:layout_marginEnd="8dp"
+            style="@style/LLMAPPButtonStyle" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Save"
+            android:layout_marginStart="8dp"
+            style="@style/LLMAPPButtonStyle" />
+
+    </LinearLayout>
+
+</LinearLayout>

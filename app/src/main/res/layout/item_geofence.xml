@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#444444"
+    android:layout_margin="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvGeofenceName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Geofence Name"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white" />
+
+        <Switch
+            android:id="@+id/switchGeofenceEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvGeofenceLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Location coordinates"
+        android:textSize="12sp"
+        android:textColor="#CCCCCC"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvGeofenceRadius"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Radius"
+            android:textSize="12sp"
+            android:textColor="#CCCCCC" />
+
+        <TextView
+            android:id="@+id/tvGeofenceChatId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Chat: Default"
+            android:textSize="12sp"
+            android:textColor="#CCCCCC"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvGeofenceMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter message"
+        android:textSize="14sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnLocateGeofence"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📍 Locate"
+            android:textSize="12sp"
+            android:layout_marginEnd="8dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_outline_style" />
+
+        <Button
+            android:id="@+id/btnDeleteGeofence"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🗑️ Delete"
+            android:textSize="12sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#FF5555" />
+
+    </LinearLayout>
+
+</LinearLayout>
