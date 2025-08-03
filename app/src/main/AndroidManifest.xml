@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -45,6 +46,13 @@
         android:requestLegacyExternalStorage="true"
         android:preserveLegacyExternalStorage="true"
         tools:targetApi="31">
+        
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDYf6fLUWfosjXnrC6FXUO6Y6_cTOXHZU8" />
+            <!-- Replace YOUR_ACTUAL_API_KEY_HERE with your Google Maps API key -->
+            
         <activity android:name=".HomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -110,6 +118,12 @@
             android:theme="@style/Theme.LLMAPP"
             android:label="Battery Optimization Settings" />
             
+        <activity
+            android:name=".geofence.GeofenceActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LLMAPP"
+            android:label="Geofence Manager" />
+            
         <!-- Background Services for Workflow Execution -->
         <service
             android:name=".service.WorkflowBackgroundService"
@@ -158,6 +172,16 @@
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- Geofence broadcast receiver -->
+        <receiver
+            android:name=".geofence.GeofenceBroadcastReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.llmapp.ACTION_GEOFENCE_EVENT" />
             </intent-filter>
         </receiver>
     </application>

@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.appcompat.widget.PopupMenu
+import com.example.llmapp.geofence.GeofenceActivity
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.example.llmapp.new_implementation.ui.NewWorkflowListActivity
 import com.example.llmapp.new_implementation.ui.NewWorkflowCreateActivity
@@ -55,6 +56,7 @@ class HomeActivity : ComponentActivity() {
         val workflowsButton = findViewById<Button>(R.id.workflowsButton)
         val newWorkflowsButton = findViewById<Button>(R.id.newWorkflowsButton)
         val llmButton = findViewById<Button>(R.id.llmButton)
+        val geofenceButton = findViewById<Button>(R.id.geofenceButton)
         val exitIcon = findViewById<ImageView>(R.id.exitIcon)
 
         signInButton.setOnClickListener {
@@ -102,6 +104,11 @@ class HomeActivity : ComponentActivity() {
         
         llmButton.setOnClickListener { view ->
             showLLMMenu(view)
+        }
+        
+        geofenceButton.setOnClickListener {
+            val intent = Intent(this, GeofenceActivity::class.java)
+            startActivity(intent)
         }
         
         // Exit icon click handler
