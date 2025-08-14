@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,10 +14,10 @@ plugins {
 }
 
 // Load local.properties
-val localProperties = java.util.Properties()
+val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
+    localProperties.load(FileInputStream(localPropertiesFile))
 }
 
 android {
@@ -137,4 +140,12 @@ dependencies {
     // ViewModel and LiveData components
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    
+    // Computer Vision & ML Kit for Image Processing
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+    implementation("com.google.mlkit:face-detection:16.1.5")
+    implementation("com.google.mlkit:image-labeling:17.0.8")
+    
+    // Image Processing Support
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
 }

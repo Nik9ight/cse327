@@ -10,6 +10,7 @@ import com.example.llmapp.R
 import com.example.llmapp.new_implementation.integration.NewImplementationBridge
 import com.example.llmapp.new_implementation.Workflow
 import com.example.llmapp.workflow.WorkflowManager
+import com.example.llmapp.utils.ServiceManager
 import kotlinx.coroutines.launch
 
 class NewWorkflowCreateActivity : ComponentActivity() {
@@ -203,6 +204,10 @@ class NewWorkflowCreateActivity : ComponentActivity() {
                 runOnUiThread {
                     val message = if (editMode) "Workflow updated successfully!" else "Workflow saved successfully!"
                     Toast.makeText(this@NewWorkflowCreateActivity, message, Toast.LENGTH_SHORT).show()
+                    
+                    // Start image workflow service if needed now that workflows exist
+                    ServiceManager.startImageWorkflowServiceIfNeeded(this@NewWorkflowCreateActivity)
+                    
                     setResult(RESULT_OK)
                     finish()
                 }

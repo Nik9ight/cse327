@@ -478,6 +478,55 @@ class GmailService(private val context: Context, private val serviceAccount: Str
             throw e
         }
     }
+
+    // Send an email with image attachment through Gmail
+    suspend fun sendEmailWithImage(
+        to: List<String>,
+        subject: String,
+        body: String,
+        imagePath: String,
+        isHtml: Boolean = true,
+        from: String? = null
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (!isSignedIn()) {
+            throw IllegalStateException("Not signed in to Gmail")
+        }
+        
+        try {
+            Log.d(TAG, "Sending email with image attachment to: ${to.joinToString(", ")}")
+            Log.d(TAG, "Subject: $subject")
+            Log.d(TAG, "Image path: $imagePath")
+            
+            // Check if image file exists
+            val imageFile = java.io.File(imagePath)
+            if (!imageFile.exists()) {
+                Log.e(TAG, "Image file does not exist: $imagePath")
+                throw IllegalArgumentException("Image file does not exist: $imagePath")
+            }
+            
+            // Build email content with image attachment
+            val fromAddress = from ?: GoogleSignIn.getLastSignedInAccount(context)?.email ?: "me"
+            val rawEmail = buildEmailMessageWithImageAttachment(to, fromAddress, subject, body, imagePath, isHtml)
+            
+            // Create Gmail message
+            val message = com.google.api.services.gmail.model.Message()
+            message.raw = java.util.Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(rawEmail.toByteArray())
+            
+            // Send the email
+            val result = gmailClient!!.users().messages()
+                .send("me", message)
+                .execute()
+            
+            Log.d(TAG, "Email with image attachment sent successfully with ID: ${result.id}")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending email with image attachment", e)
+            throw e
+        }
+    }
     
     // Helper method to build RFC 2822 compliant email message
     private fun buildEmailMessage(
@@ -497,6 +546,70 @@ class GmailService(private val context: Context, private val serviceAccount: Str
             appendLine("MIME-Version: 1.0")
             appendLine()
             append(body)
+        }
+    }
+
+    // Helper method to build RFC 2822 compliant email message with image attachment
+    private fun buildEmailMessageWithImageAttachment(
+        to: List<String>,
+        from: String,
+        subject: String,
+        body: String,
+        imagePath: String,
+        isHtml: Boolean
+    ): String {
+        val boundary = "----=_Part_${System.currentTimeMillis()}_${Math.random()}"
+        val contentType = if (isHtml) "text/html; charset=UTF-8" else "text/plain; charset=UTF-8"
+        
+        // Read image file and encode to base64
+        val imageFile = java.io.File(imagePath)
+        val imageBytes = imageFile.readBytes()
+        val imageBase64 = java.util.Base64.getEncoder().encodeToString(imageBytes)
+        val imageName = imageFile.name
+        
+        // Determine MIME type based on file extension
+        val mimeType = when (imagePath.lowercase().substringAfterLast('.')) {
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "gif" -> "image/gif"
+            "bmp" -> "image/bmp"
+            else -> "image/jpeg" // default
+        }
+        
+        return buildString {
+            // Headers
+            appendLine("From: $from")
+            appendLine("To: ${to.joinToString(", ")}")
+            appendLine("Subject: $subject")
+            appendLine("MIME-Version: 1.0")
+            appendLine("Content-Type: multipart/mixed; boundary=\"$boundary\"")
+            appendLine()
+            
+            // Body part
+            appendLine("--$boundary")
+            appendLine("Content-Type: $contentType")
+            appendLine("Content-Transfer-Encoding: 7bit")
+            appendLine()
+            appendLine(body)
+            appendLine()
+            
+            // Image attachment part
+            appendLine("--$boundary")
+            appendLine("Content-Type: $mimeType; name=\"$imageName\"")
+            appendLine("Content-Transfer-Encoding: base64")
+            appendLine("Content-Disposition: attachment; filename=\"$imageName\"")
+            appendLine()
+            
+            // Split base64 into 76-character lines as per RFC 2045
+            var index = 0
+            while (index < imageBase64.length) {
+                val endIndex = minOf(index + 76, imageBase64.length)
+                appendLine(imageBase64.substring(index, endIndex))
+                index = endIndex
+            }
+            
+            appendLine()
+            appendLine("--$boundary--")
         }
     }
     

@@ -1,5 +1,6 @@
 package com.example.llmapp
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -57,6 +58,8 @@ class HomeActivity : ComponentActivity() {
         val newWorkflowsButton = findViewById<Button>(R.id.newWorkflowsButton)
         val llmButton = findViewById<Button>(R.id.llmButton)
         val geofenceButton = findViewById<Button>(R.id.geofenceButton)
+        val imageWorkflowButton = findViewById<Button>(R.id.imageWorkflowButton)
+        val enhancedImageWorkflowButton = findViewById<Button>(R.id.enhancedImageWorkflowButton)
         val exitIcon = findViewById<ImageView>(R.id.exitIcon)
 
         signInButton.setOnClickListener {
@@ -108,6 +111,18 @@ class HomeActivity : ComponentActivity() {
         
         geofenceButton.setOnClickListener {
             val intent = Intent(this, GeofenceActivity::class.java)
+            startActivity(intent)
+        }
+        
+        imageWorkflowButton.setOnClickListener {
+            // Primary workflow interface
+            val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowListActivity::class.java)
+            startActivity(intent)
+        }
+        
+        enhancedImageWorkflowButton.setOnClickListener {
+            // Quick workflow creation
+            val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowCreationActivity::class.java)
             startActivity(intent)
         }
         
@@ -310,22 +325,28 @@ class HomeActivity : ComponentActivity() {
         val isRunning = ServiceManager.isServiceRunning(this)
         val batteryOptimized = !BackgroundPermissionManager.isIgnoringBatteryOptimizations(this)
         
+        // Check if image workflow service is running
+        val imageWorkflowRunning = isServiceRunning("com.example.llmapp.workflows.services.ImageWorkflowBackgroundService")
+        
         val debugInfo = buildString {
             appendLine("🔧 Service Debug Info")
             appendLine("━━━━━━━━━━━━━━━━━━━━")
             appendLine("Background Service: ${if (isRunning) "✅ Running" else "❌ Stopped"}")
+            appendLine("Image Workflow Service: ${if (imageWorkflowRunning) "✅ Running" else "❌ Stopped"}")
             appendLine("Battery Optimization: ${if (batteryOptimized) "⚠️ Enabled (May kill service)" else "✅ Disabled"}")
             appendLine("Permissions: ${if (permissions.hasPermissions(requiredPermissions)) "✅ Granted" else "❌ Missing"}")
             appendLine("")
-            appendLine("💡 Long press to restart service")
+            appendLine("💡 Long press to restart services")
         }
         
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Debug Information")
             .setMessage(debugInfo)
-            .setPositiveButton("Restart Service") { _, _ ->
+            .setPositiveButton("Restart Services") { _, _ ->
                 ServiceManager.startBackgroundService(this)
-                Toast.makeText(this, "Service restart requested", Toast.LENGTH_SHORT).show()
+                // Also try to restart image workflow service if it exists
+                restartImageWorkflowService()
+                Toast.makeText(this, "Services restart requested", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Close", null)
             .setNeutralButton("Open Battery Settings") { _, _ ->
@@ -333,5 +354,55 @@ class HomeActivity : ComponentActivity() {
                 startActivity(intent)
             }
             .show()
+    }
+    
+    /**
+     * Try to restart the image workflow service
+     */
+    private fun restartImageWorkflowService() {
+        try {
+            // Stop first
+            val stopIntent = Intent(this, com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java)
+            stopService(stopIntent)
+            
+            // Check if there's saved configuration to restart with
+            val prefs = getSharedPreferences("image_workflow_prefs", MODE_PRIVATE)
+            val personEnabled = prefs.getBoolean("person_workflow_enabled", false)
+            val receiptEnabled = prefs.getBoolean("receipt_workflow_enabled", false)
+            
+            if (personEnabled || receiptEnabled) {
+                // Start with saved configuration
+                val startIntent = Intent(this, com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java)
+                startIntent.putExtra("person_workflow_enabled", personEnabled)
+                startIntent.putExtra("receipt_workflow_enabled", receiptEnabled)
+                startIntent.putExtra("person_workflow_chat_id", prefs.getString("person_workflow_chat_id", ""))
+                startIntent.putExtra("receipt_workflow_chat_id", prefs.getString("receipt_workflow_chat_id", ""))
+                startIntent.putExtra("target_subject", prefs.getString("target_subject", ""))
+                startIntent.putExtra("receipt_summary_time", prefs.getString("receipt_summary_time", "20:00"))
+                
+                startForegroundService(startIntent)
+                Log.d("HomeActivity", "Image workflow service restarted with saved configuration")
+            }
+        } catch (e: Exception) {
+            Log.e("HomeActivity", "Error restarting image workflow service", e)
+        }
+    }
+    
+    /**
+     * Check if a specific service is running
+     */
+    private fun isServiceRunning(serviceClassName: String): Boolean {
+        return try {
+            val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            @Suppress("DEPRECATION")
+            val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
+            
+            runningServices.any { service -> 
+                service.service.className == serviceClassName
+            }
+        } catch (e: Exception) {
+            Log.e("HomeActivity", "Error checking if service is running", e)
+            false
+        }
     }
 }

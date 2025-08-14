@@ -10,6 +10,7 @@ import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.llmapp.workflow.*
+import com.example.llmapp.utils.ServiceManager
 import kotlinx.coroutines.launch
 
 class WorkflowCreateActivity : ComponentActivity() {
@@ -529,6 +530,10 @@ class WorkflowCreateActivity : ComponentActivity() {
                     result.fold(
                         onSuccess = { workflow ->
                             showSuccess(if (editMode) "Workflow updated successfully!" else "Workflow created successfully!")
+                            
+                            // Start image workflow service if needed now that workflows exist
+                            ServiceManager.startImageWorkflowServiceIfNeeded(this@WorkflowCreateActivity)
+                            
                             setResult(RESULT_OK)
                             finish()
                         },

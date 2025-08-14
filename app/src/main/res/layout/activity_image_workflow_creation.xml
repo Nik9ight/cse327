@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Enhanced Image Workflow"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="24dp"
+            android:gravity="center" />
+
+        <!-- Workflow Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Workflow Name *"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etWorkflowName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Enter workflow name"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Workflow Type Selection -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Workflow Type *"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/rgWorkflowType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/rbImageForward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Image Forward (Person Detection)"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/rbDocumentAnalysis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Document Analysis"
+                android:textSize="16sp" />
+
+        </RadioGroup>
+
+        <!-- Image Forward Options -->
+        <LinearLayout
+            android:id="@+id/layoutImageForward"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reference Image *"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnSelectReference"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Select Reference Image"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSelectedReference"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No reference image selected"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="16dp" />
+
+        </LinearLayout>
+
+        <!-- Document Analysis Options -->
+        <LinearLayout
+            android:id="@+id/layoutDocumentAnalysis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Document Type *"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <EditText
+                android:id="@+id/etDocumentType"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="e.g. receipts, prescriptions, id"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Scheduled Time (Daily Summary)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TimePicker
+                android:id="@+id/tpScheduledTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:timePickerMode="spinner"
+                android:layout_marginBottom="16dp" />
+
+        </LinearLayout>
+
+        <!-- Destination Selection -->
+        <LinearLayout
+            android:id="@+id/layoutDestination"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Destination *"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/rgDestination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <RadioButton
+                    android:id="@+id/rbGmail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Gmail"
+                    android:textSize="16sp" />
+
+                <RadioButton
+                    android:id="@+id/rbTelegram"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Telegram"
+                    android:textSize="16sp" />
+
+            </RadioGroup>
+
+            <!-- Gmail Options -->
+            <LinearLayout
+                android:id="@+id/layoutGmailOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Gmail Recipient *"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/etGmailRecipient"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Enter email address"
+                    android:inputType="textEmailAddress"
+                    android:layout_marginBottom="16dp" />
+
+            </LinearLayout>
+
+            <!-- Telegram Options -->
+            <LinearLayout
+                android:id="@+id/layoutTelegramOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Telegram Chat ID *"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <EditText
+                    android:id="@+id/etTelegramChatId"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Enter chat ID"
+                    android:inputType="text"
+                    android:layout_marginBottom="16dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Create Button -->
+        <Button
+            android:id="@+id/btnCreate"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Create Workflow"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp" />
+
+    </LinearLayout>
+
+</ScrollView>

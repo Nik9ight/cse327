@@ -9,6 +9,7 @@ class LLMApplication : Application(), Configuration.Provider {
     
     override fun onCreate() {
         super.onCreate()
+        
         // No need to manually initialize WorkManager anymore
         // It will automatically use our configuration
         

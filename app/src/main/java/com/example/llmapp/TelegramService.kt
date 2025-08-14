@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONObject
 import java.io.IOException
 
@@ -293,5 +294,140 @@ class TelegramService(private val context: Context) {
                 }
             }
         })
+    }
+    
+    /**
+     * Send a photo to Telegram with caption
+     */
+    fun sendPhoto(imagePath: String, caption: String = "", onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (!isLoggedIn || botToken == null || chatId == null) {
+            Log.e(TAG, "sendPhoto: Not logged in - botToken: ${botToken != null}, chatId: ${chatId != null}")
+            onError("Not logged in to Telegram")
+            return
+        }
+        
+        Log.d(TAG, "sendPhoto: Attempting to send photo: $imagePath")
+        Log.d(TAG, "sendPhoto: Chat ID: $chatId")
+        Log.d(TAG, "sendPhoto: Caption length: ${caption.length}")
+        
+        val file = java.io.File(imagePath)
+        if (!file.exists()) {
+            Log.e(TAG, "sendPhoto: File not found: $imagePath")
+            onError("Image file not found: $imagePath")
+            return
+        }
+        
+        // Check file size (Telegram limit is 50MB, but we'll keep it reasonable)
+        val maxSize = 10 * 1024 * 1024 // 10MB
+        if (file.length() > maxSize) {
+            Log.e(TAG, "sendPhoto: File too large: ${file.length()} bytes")
+            onError("Image too large (${file.length() / 1024 / 1024}MB). Max: ${maxSize / 1024 / 1024}MB")
+            return
+        }
+        
+        Log.d(TAG, "sendPhoto: File size OK: ${file.length()} bytes")
+        
+        // Validate chat ID format
+        val cleanChatId = chatId!!.trim()
+        if (cleanChatId.isEmpty()) {
+            Log.e(TAG, "sendPhoto: Empty chat ID")
+            onError("Invalid chat ID: empty")
+            return
+        }
+        
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("chat_id", cleanChatId)
+            .addFormDataPart("photo", file.name, RequestBody.create("image/jpeg".toMediaType(), file))
+            .apply {
+                if (caption.isNotEmpty()) {
+                    addFormDataPart("caption", caption)
+                    // Don't use Markdown to avoid parsing issues
+                    // addFormDataPart("parse_mode", "Markdown")
+                }
+            }
+            .build()
+        
+        val url = "https://api.telegram.org/bot$botToken/sendPhoto"
+        Log.d(TAG, "sendPhoto: Request URL: $url")
+        
+        val request = Request.Builder()
+            .url(url)
+            .post(requestBody)
+            .build()
+        
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e(TAG, "sendPhoto: Network failure", e)
+                (context as? Activity)?.runOnUiThread {
+                    onError("Network error: ${e.message}")
+                }
+            }
+            
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                Log.d(TAG, "sendPhoto response: ${response.code}")
+                Log.d(TAG, "sendPhoto response body: $responseBody")
+                
+                if (response.isSuccessful && responseBody != null) {
+                    try {
+                        val json = JSONObject(responseBody)
+                        if (json.getBoolean("ok")) {
+                            Log.d(TAG, "Photo sent successfully")
+                            (context as? Activity)?.runOnUiThread {
+                                onSuccess()
+                            }
+                        } else {
+                            val description = json.optString("description", "Unknown error")
+                            val errorCode = json.optInt("error_code", 0)
+                            Log.e(TAG, "sendPhoto: Telegram API error - Code: $errorCode, Description: $description")
+                            (context as? Activity)?.runOnUiThread {
+                                onError("Failed to send photo: $description (Error: $errorCode)")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "sendPhoto: Error parsing response", e)
+                        (context as? Activity)?.runOnUiThread {
+                            onError("Error parsing response: ${e.message}")
+                        }
+                    }
+                } else {
+                    val errorMessage = try {
+                        if (responseBody != null) {
+                            val json = JSONObject(responseBody)
+                            val description = json.optString("description", response.message)
+                            val errorCode = json.optInt("error_code", response.code)
+                            Log.e(TAG, "sendPhoto: HTTP error - Code: $errorCode, Description: $description")
+                            "$description (Error: $errorCode)"
+                        } else {
+                            Log.e(TAG, "sendPhoto: HTTP error - Code: ${response.code}, Message: ${response.message}")
+                            "Error ${response.code}: ${response.message}"
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "sendPhoto: Error parsing error response", e)
+                        "Error ${response.code}: ${response.message}"
+                    }
+                    
+                    (context as? Activity)?.runOnUiThread {
+                        onError("Failed to send photo: $errorMessage")
+                    }
+                }
+            }
+        })
+    }
+    
+    /**
+     * Test the bot token and chat ID by sending a simple message
+     */
+    fun testConnection(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (botToken == null || chatId == null) {
+            onError("Bot token or chat ID not set")
+            return
+        }
+        
+        Log.d(TAG, "Testing connection with chat ID: $chatId")
+        
+        val testMessage = "🤖 Test message from LLMAPP - Image workflows are ready!"
+        sendMessage(testMessage, onSuccess, onError)
     }
 }

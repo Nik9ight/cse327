@@ -7,6 +7,7 @@ import com.example.llmapp.utils.ServiceManager
 import com.example.llmapp.service.WorkflowBackgroundService
 import com.example.llmapp.service.WorkflowSchedulerService
 import com.example.llmapp.service.WorkflowWatchdogService
+import com.example.llmapp.workflows.services.ImageWorkflowBackgroundService
 import kotlin.system.exitProcess
 
 /**
@@ -55,7 +56,10 @@ object AppExitManager {
         Log.d(TAG, "Stopping all background services with force if needed...")
         
         try {
-            // First try graceful stop
+            // Stop image workflow services specifically
+            stopImageWorkflowServices(context)
+            
+            // First try graceful stop for other services
             Log.d(TAG, "Attempting graceful service stop...")
             ServiceManager.stopBackgroundService(context)
             
@@ -77,6 +81,20 @@ object AppExitManager {
     }
     
     /**
+     * Stop image workflow services specifically
+     */
+    private fun stopImageWorkflowServices(context: Context) {
+        try {
+            Log.d(TAG, "Stopping image workflow services...")
+            val intent = Intent(context, ImageWorkflowBackgroundService::class.java)
+            val stopped = context.stopService(intent)
+            Log.d(TAG, "Image workflow service stop result: $stopped")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping image workflow service", e)
+        }
+    }
+    
+    /**
      * Force stop all services
      */
     private fun forceStopServices(context: Context) {
@@ -86,7 +104,8 @@ object AppExitManager {
         val servicesToStop = listOf(
             WorkflowBackgroundService::class.java,
             WorkflowSchedulerService::class.java,
-            WorkflowWatchdogService::class.java
+            WorkflowWatchdogService::class.java,
+            ImageWorkflowBackgroundService::class.java
         )
         
         servicesToStop.forEach { serviceClass ->
@@ -130,7 +149,7 @@ object AppExitManager {
     fun showExitConfirmation(context: Context, onConfirm: () -> Unit) {
         androidx.appcompat.app.AlertDialog.Builder(context)
             .setTitle("Exit App")
-            .setMessage("Are you sure you want to exit?\n\nThis will:\n• Stop all background workflows\n• Close the application completely\n• Clear all active sessions")
+            .setMessage("Are you sure you want to exit?\n\nThis will:\n• Stop all background workflows\n• Stop image monitoring services\n• Close the application completely\n• Clear all active sessions")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("Exit") { _, _ ->
                 // Show starting exit process

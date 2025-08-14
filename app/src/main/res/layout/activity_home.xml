@@ -104,6 +104,22 @@
             android:text="📍 GEOFENCE MANAGER" />
 
         <Button
+            android:id="@+id/imageWorkflowButton"
+            style="@style/LLMAPPButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="🤖 IMAGE WORKFLOWS" />
+
+        <Button
+            android:id="@+id/enhancedImageWorkflowButton"
+            style="@style/LLMAPPButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="🚀 ENHANCED IMAGE WORKFLOWS" />
+
+        <Button
             android:id="@+id/llmButton"
             style="@style/LLMAPPButtonStyle"
             android:layout_width="match_parent"
