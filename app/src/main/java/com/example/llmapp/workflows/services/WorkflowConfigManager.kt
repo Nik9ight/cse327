@@ -180,6 +180,7 @@ class WorkflowConfigManager(private val context: Context) {
             put("scheduledTime", workflow.scheduledTime)
             put("destinationType", workflow.destinationType.name)
             put("gmailRecipient", workflow.gmailRecipient)
+            put("telegramBotToken", workflow.telegramBotToken)
             put("telegramChatId", workflow.telegramChatId)
         }
     }
@@ -195,6 +196,7 @@ class WorkflowConfigManager(private val context: Context) {
             scheduledTime = json.getString("scheduledTime"),
             destinationType = DestinationType.valueOf(json.getString("destinationType")),
             gmailRecipient = json.getString("gmailRecipient"),
+            telegramBotToken = json.optString("telegramBotToken", ""), // Use optString for backwards compatibility
             telegramChatId = json.getString("telegramChatId")
         )
     }

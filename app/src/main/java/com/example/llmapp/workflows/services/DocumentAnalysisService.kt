@@ -431,7 +431,7 @@ class DocumentAnalysisService(
         3. Important details relevant to ${documentType.lowercase()}
         4. no need to add item list in report
         
-        Keep the analysis concise (8-10 sentences maximum) and focus only on the most important information. if it is not a ${documentType.lowercase()}, only reply "not a ${documentType.lowercase()},nothing else"
+        if it is not a ${documentType.lowercase()}, then reply "no  ${documentType.lowercase()} type document found",nothing else.
                 """.trimIndent()
     }
     
@@ -444,7 +444,7 @@ class DocumentAnalysisService(
         }.joinToString("\n")
 
         return """
-        Write a 2-3 sentence summary of these ${analyses.size} documents only for from $date:
+        Write a concise summary of these ${analyses.size} documents only for from $date:
         
         $analysesText
         

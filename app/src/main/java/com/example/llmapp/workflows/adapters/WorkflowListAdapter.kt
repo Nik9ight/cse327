@@ -61,7 +61,12 @@ class WorkflowListAdapter(
             // Set destination
             tvDestination.text = when (workflow.destinationType) {
                 DestinationType.GMAIL -> "Gmail: ${workflow.gmailRecipient}"
-                DestinationType.TELEGRAM -> "Telegram: ${workflow.telegramChatId}"
+                DestinationType.TELEGRAM -> {
+                    val botInfo = if (workflow.telegramBotToken.isNotEmpty()) {
+                        " (Bot: ${workflow.telegramBotToken.take(10)}...)"
+                    } else ""
+                    "Telegram: ${workflow.telegramChatId}$botInfo"
+                }
             }
             
             // Set details based on workflow type

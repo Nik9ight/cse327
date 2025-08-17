@@ -420,7 +420,8 @@ data class ImageWorkflowConfig(
     // Destination settings (applies to both types)
     val destinationType: DestinationType = DestinationType.GMAIL,
     val gmailRecipient: String = "", // For Gmail destination
-    val telegramChatId: String = "" // For Telegram destination
+    val telegramBotToken: String = "", // For Telegram destination - bot token
+    val telegramChatId: String = "" // For Telegram destination - chat ID
 )
 
 /**

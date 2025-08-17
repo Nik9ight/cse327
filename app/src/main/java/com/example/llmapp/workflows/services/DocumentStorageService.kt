@@ -117,6 +117,41 @@ class DocumentStorageService(private val context: Context) {
     }
 
     /**
+     * Clear all analyses for a specific workflow (used when deleting workflow)
+     */
+    fun clearAllAnalysesForWorkflow(workflowId: String): Boolean {
+        return try {
+            val allAnalyses = loadAllAnalyses().toMutableList()
+            val initialSize = allAnalyses.size
+            allAnalyses.removeAll { it.workflowId == workflowId }
+            
+            val jsonArray = JSONArray()
+            allAnalyses.forEach { analysis ->
+                val json = JSONObject().apply {
+                    put("originalText", analysis.originalText)
+                    put("analysis", analysis.analysis)
+                    put("documentType", analysis.documentType)
+                    put("imagePath", analysis.imagePath)
+                    put("timestamp", analysis.timestamp)
+                    put("date", analysis.date)
+                    put("workflowId", analysis.workflowId)
+                }
+                jsonArray.put(json)
+            }
+            
+            analysesFile.writeText(jsonArray.toString())
+            
+            val clearedCount = initialSize - allAnalyses.size
+            Log.d(TAG, "Cleared $clearedCount total analyses for workflow $workflowId")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error clearing all analyses for workflow $workflowId", e)
+            false
+        }
+    }
+
+    /**
      * Save document analysis result
      */
     fun saveAnalysis(analysis: DocumentAnalysisResult): Boolean {
@@ -282,6 +317,21 @@ class DocumentStorageService(private val context: Context) {
         } catch (e: Exception) {
             Log.e(TAG, "Error getting today's document counts", e)
             emptyMap()
+        }
+    }
+    
+    /**
+     * Get count of analyses for a specific workflow
+     */
+    fun getAnalysisCountForWorkflow(workflowId: String): Int {
+        return try {
+            val allAnalyses = loadAllAnalyses()
+            val count = allAnalyses.count { it.workflowId == workflowId }
+            Log.d(TAG, "Found $count analyses for workflow $workflowId")
+            count
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting analysis count for workflow $workflowId", e)
+            0
         }
     }
     

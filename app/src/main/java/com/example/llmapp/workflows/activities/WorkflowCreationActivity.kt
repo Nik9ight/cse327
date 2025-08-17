@@ -6,8 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.llmapp.R
 import com.example.llmapp.workflows.services.ImageWorkflowConfig
@@ -15,6 +18,12 @@ import com.example.llmapp.workflows.services.WorkflowType
 import com.example.llmapp.workflows.services.DestinationType
 import com.example.llmapp.workflows.services.WorkflowConfigManager
 import com.example.llmapp.utils.ServiceManager
+import com.example.llmapp.utils.TelegramChatFetcher
+import com.example.llmapp.utils.TelegramConfigManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Activity for creating new image workflows
@@ -52,10 +61,21 @@ class WorkflowCreationActivity : AppCompatActivity() {
     private lateinit var layoutGmailOptions: LinearLayout
     private lateinit var layoutTelegramOptions: LinearLayout
     private lateinit var etGmailRecipient: EditText
+    
+    // Enhanced Telegram options
+    private lateinit var etTelegramBotToken: EditText
+    private lateinit var btnFetchChats: Button
+    private lateinit var spinnerTelegramChats: Spinner
     private lateinit var etTelegramChatId: EditText
+    private lateinit var tvChatSelectionHelp: TextView
+    
+    private val telegramChatFetcher = TelegramChatFetcher()
+    private var availableChats: List<TelegramChatFetcher.TelegramChat> = emptyList()
+    private var selectedChatId: String = ""
     
     private lateinit var btnCreate: Button
     private lateinit var workflowConfigManager: WorkflowConfigManager
+    private lateinit var telegramConfigManager: TelegramConfigManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +86,7 @@ class WorkflowCreationActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         
         workflowConfigManager = WorkflowConfigManager(this)
+        telegramConfigManager = TelegramConfigManager(this)
         
         initViews()
         setupListeners()
@@ -96,7 +117,12 @@ class WorkflowCreationActivity : AppCompatActivity() {
         layoutGmailOptions = findViewById(R.id.layoutGmailOptions)
         layoutTelegramOptions = findViewById(R.id.layoutTelegramOptions)
         etGmailRecipient = findViewById(R.id.etGmailRecipient)
+        
+        // Enhanced Telegram options (bot token now managed separately)
+        btnFetchChats = findViewById(R.id.btnFetchChats)
+        spinnerTelegramChats = findViewById(R.id.spinnerTelegramChats)
         etTelegramChatId = findViewById(R.id.etTelegramChatId)
+        tvChatSelectionHelp = findViewById(R.id.tvChatSelectionHelp)
         
         btnCreate = findViewById(R.id.btnCreate)
         
@@ -130,6 +156,26 @@ class WorkflowCreationActivity : AppCompatActivity() {
         
         btnSelectReference.setOnClickListener {
             selectReferenceImage()
+        }
+        
+        btnFetchChats.setOnClickListener {
+            fetchTelegramChats()
+        }
+        
+        spinnerTelegramChats.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position > 0 && availableChats.isNotEmpty()) { // Skip the first "Select chat" item
+                    val selectedChat = availableChats[position - 1]
+                    selectedChatId = selectedChat.chatId
+                    etTelegramChatId.setText(selectedChatId)
+                    Log.d(TAG, "Selected chat: ${selectedChat.getDisplayText()}")
+                }
+            }
+            
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedChatId = ""
+                etTelegramChatId.setText("")
+            }
         }
         
         btnCreate.setOnClickListener {
@@ -169,6 +215,9 @@ class WorkflowCreationActivity : AppCompatActivity() {
         
         // Clear telegram fields
         etTelegramChatId.text.clear()
+        selectedChatId = ""
+        availableChats = emptyList()
+        updateTelegramChatSpinner()
     }
     
     private fun showTelegramOptions() {
@@ -177,6 +226,10 @@ class WorkflowCreationActivity : AppCompatActivity() {
         
         // Clear gmail fields
         etGmailRecipient.text.clear()
+        
+        // Initialize chat spinner and auto-fetch chats if token is configured
+        updateTelegramChatSpinner()
+        autoFetchChatsIfConfigured()
     }
     
     private fun selectReferenceImage() {
@@ -207,6 +260,199 @@ class WorkflowCreationActivity : AppCompatActivity() {
             }
         }
         return if (path.isNotEmpty()) path else uri.path ?: ""
+    }
+    
+    /**
+     * Fetch available Telegram chats from the saved bot token
+     */
+    private fun fetchTelegramChats() {
+        val botToken = telegramConfigManager.getBotToken()
+        
+        if (botToken.isNullOrEmpty()) {
+            showTelegramSettingsDialog("Please configure your Telegram bot token first.")
+            return
+        }
+        
+        fetchChatsWithToken(botToken)
+    }
+    
+    /**
+     * Auto-fetch chats if bot token is configured
+     */
+    private fun autoFetchChatsIfConfigured() {
+        val botToken = telegramConfigManager.getBotToken()
+        
+        if (botToken.isNullOrEmpty()) {
+            tvChatSelectionHelp.text = "Configure your Telegram bot token using the settings menu (gear icon) to automatically fetch available chats."
+            tvChatSelectionHelp.visibility = View.VISIBLE
+            btnFetchChats.text = "Configure Bot Token"
+            btnFetchChats.setOnClickListener { showTelegramSettingsDialog() }
+            return
+        }
+        
+        // Auto-fetch chats
+        tvChatSelectionHelp.text = "Fetching available chats..."
+        tvChatSelectionHelp.visibility = View.VISIBLE
+        btnFetchChats.text = "Refresh Chats"
+        btnFetchChats.setOnClickListener { fetchTelegramChats() }
+        
+        fetchChatsWithToken(botToken)
+    }
+    
+    /**
+     * Fetch chats with a specific bot token
+     */
+    private fun fetchChatsWithToken(botToken: String) {
+        if (!telegramChatFetcher.isValidBotTokenFormat(botToken)) {
+            tvChatSelectionHelp.text = "Invalid bot token format. Please update your settings."
+            tvChatSelectionHelp.visibility = View.VISIBLE
+            return
+        }
+        
+        // Show progress
+        btnFetchChats.isEnabled = false
+        btnFetchChats.text = "Fetching..."
+        
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                Log.d(TAG, "Fetching chats with saved bot token")
+                
+                // Fetch chats directly (token already validated when saved)
+                val chatsResult = telegramChatFetcher.findChatIdsAndUsernames(botToken)
+                chatsResult.fold(
+                    onSuccess = { chats ->
+                        availableChats = chats
+                        updateTelegramChatSpinner()
+                        
+                        if (chats.isEmpty()) {
+                            tvChatSelectionHelp.text = "No conversations found. Send a message to your bot first to create a conversation."
+                            tvChatSelectionHelp.visibility = View.VISIBLE
+                        } else {
+                            tvChatSelectionHelp.text = "Found ${chats.size} conversation(s). Select one or enter chat ID manually."
+                            tvChatSelectionHelp.visibility = View.VISIBLE
+                        }
+                        
+                        Log.d(TAG, "Found ${chats.size} chats")
+                    },
+                    onFailure = { error ->
+                        Log.e(TAG, "Error fetching chats", error)
+                        tvChatSelectionHelp.text = "Error fetching conversations: ${error.message}. Check your bot token in settings."
+                        tvChatSelectionHelp.visibility = View.VISIBLE
+                    }
+                )
+            } finally {
+                btnFetchChats.isEnabled = true
+                btnFetchChats.text = "Refresh Chats"
+            }
+        }
+    }
+    
+    /**
+     * Update the Telegram chat spinner with available chats
+     */
+    private fun updateTelegramChatSpinner() {
+        val spinnerItems = mutableListOf<String>()
+        spinnerItems.add("Select a chat") // Default item
+        
+        availableChats.forEach { chat ->
+            spinnerItems.add(chat.getDisplayText())
+        }
+        
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerItems)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerTelegramChats.adapter = adapter
+    }
+    
+    /**
+     * Show Telegram settings dialog
+     */
+    private fun showTelegramSettingsDialog(message: String? = null) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_telegram_settings, null)
+        val etDialogBotToken = dialogView.findViewById<EditText>(R.id.etDialogBotToken)
+        val btnDialogCancel = dialogView.findViewById<Button>(R.id.btnDialogCancel)
+        val btnDialogTest = dialogView.findViewById<Button>(R.id.btnDialogTest)
+        val btnDialogSave = dialogView.findViewById<Button>(R.id.btnDialogSave)
+        
+        // Pre-fill with existing token
+        val existingToken = telegramConfigManager.getBotToken()
+        if (!existingToken.isNullOrEmpty()) {
+            etDialogBotToken.setText(existingToken)
+        }
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+        
+        // Show custom message if provided
+        if (message != null) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
+        
+        btnDialogCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        btnDialogTest.setOnClickListener {
+            val token = etDialogBotToken.text.toString().trim()
+            if (token.isEmpty()) {
+                etDialogBotToken.error = "Bot token is required"
+                return@setOnClickListener
+            }
+            
+            if (!telegramChatFetcher.isValidBotTokenFormat(token)) {
+                etDialogBotToken.error = "Invalid bot token format"
+                return@setOnClickListener
+            }
+            
+            btnDialogTest.isEnabled = false
+            btnDialogTest.text = "Testing..."
+            
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    val result = telegramChatFetcher.testBotToken(token)
+                    result.fold(
+                        onSuccess = { botInfo ->
+                            Toast.makeText(this@WorkflowCreationActivity, "✓ $botInfo", Toast.LENGTH_SHORT).show()
+                            btnDialogSave.isEnabled = true
+                        },
+                        onFailure = { error ->
+                            Toast.makeText(this@WorkflowCreationActivity, "❌ ${error.message}", Toast.LENGTH_LONG).show()
+                            etDialogBotToken.error = "Token validation failed"
+                        }
+                    )
+                } finally {
+                    btnDialogTest.isEnabled = true
+                    btnDialogTest.text = "Test Token"
+                }
+            }
+        }
+        
+        btnDialogSave.setOnClickListener {
+            val token = etDialogBotToken.text.toString().trim()
+            if (token.isEmpty()) {
+                etDialogBotToken.error = "Bot token is required"
+                return@setOnClickListener
+            }
+            
+            if (!telegramChatFetcher.isValidBotTokenFormat(token)) {
+                etDialogBotToken.error = "Invalid bot token format"
+                return@setOnClickListener
+            }
+            
+            // Save token
+            telegramConfigManager.saveBotToken(token)
+            Toast.makeText(this@WorkflowCreationActivity, "Bot token saved successfully!", Toast.LENGTH_SHORT).show()
+            
+            // Auto-fetch chats if Telegram is currently selected
+            if (rbTelegram.isChecked) {
+                autoFetchChatsIfConfigured()
+            }
+            
+            dialog.dismiss()
+        }
+        
+        dialog.show()
     }
     
     private fun createWorkflow() {
@@ -270,11 +516,24 @@ class WorkflowCreationActivity : AppCompatActivity() {
                     DestinationType.GMAIL
                 }
                 R.id.rbTelegram -> {
+                    val botToken = telegramConfigManager.getBotToken()
                     val chatId = etTelegramChatId.text.toString().trim()
+                    
+                    if (botToken.isNullOrEmpty()) {
+                        Toast.makeText(this, "Please configure your Telegram bot token first (use settings menu)", Toast.LENGTH_LONG).show()
+                        return
+                    }
+                    
+                    if (!telegramChatFetcher.isValidBotTokenFormat(botToken)) {
+                        Toast.makeText(this, "Invalid bot token. Please update your settings.", Toast.LENGTH_LONG).show()
+                        return
+                    }
+                    
                     if (chatId.isEmpty()) {
                         etTelegramChatId.error = "Telegram chat ID is required"
                         return
                     }
+                    
                     DestinationType.TELEGRAM
                 }
                 else -> {
@@ -292,6 +551,7 @@ class WorkflowCreationActivity : AppCompatActivity() {
                 scheduledTime = if (workflowType == WorkflowType.DOCUMENT_ANALYSIS) "${tpScheduledTime.hour}:${String.format("%02d", tpScheduledTime.minute)}" else "",
                 destinationType = destinationType,
                 gmailRecipient = if (destinationType == DestinationType.GMAIL) etGmailRecipient.text.toString().trim() else "",
+                telegramBotToken = if (destinationType == DestinationType.TELEGRAM) telegramConfigManager.getBotToken() ?: "" else "",
                 telegramChatId = if (destinationType == DestinationType.TELEGRAM) etTelegramChatId.text.toString().trim() else ""
             )
             
@@ -317,10 +577,19 @@ class WorkflowCreationActivity : AppCompatActivity() {
         }
     }
     
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.workflow_creation_menu, menu)
+        return true
+    }
+    
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
+                true
+            }
+            R.id.action_settings -> {
+                showTelegramSettingsDialog()
                 true
             }
             else -> super.onOptionsItemSelected(item)

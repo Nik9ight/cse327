@@ -13,6 +13,7 @@ import com.example.llmapp.workflows.services.ImageWorkflowConfig
 import com.example.llmapp.workflows.services.WorkflowType
 import com.example.llmapp.workflows.services.DestinationType
 import com.example.llmapp.workflows.services.WorkflowConfigManager
+import com.example.llmapp.workflows.services.DocumentStorageService
 import com.example.llmapp.workflows.adapters.WorkflowListAdapter
 import com.example.llmapp.utils.ServiceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -32,6 +33,7 @@ class WorkflowListActivity : AppCompatActivity() {
     private lateinit var workflowAdapter: WorkflowListAdapter
     private lateinit var fabCreate: FloatingActionButton
     private lateinit var workflowConfigManager: WorkflowConfigManager
+    private lateinit var documentStorageService: DocumentStorageService
 
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +45,7 @@ class WorkflowListActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         
         workflowConfigManager = WorkflowConfigManager(this)
+        documentStorageService = DocumentStorageService(this)
         
         initViews()
         setupRecyclerView()
@@ -125,9 +128,24 @@ class WorkflowListActivity : AppCompatActivity() {
     }
     
     private fun showDeleteConfirmation(workflow: ImageWorkflowConfig) {
+        // Build the confirmation message based on workflow type
+        val message = if (workflow.workflowType == WorkflowType.DOCUMENT_ANALYSIS) {
+            // Check how many analyses will be deleted
+            val analysisCount = documentStorageService.getAnalysisCountForWorkflow(workflow.workflowId)
+            if (analysisCount > 0) {
+                "Are you sure you want to delete '${workflow.workflowName}'?\n\n" +
+                "⚠️ This will also delete $analysisCount stored document analysis report(s).\n\n" +
+                "This action cannot be undone."
+            } else {
+                "Are you sure you want to delete '${workflow.workflowName}'?\n\nThis action cannot be undone."
+            }
+        } else {
+            "Are you sure you want to delete '${workflow.workflowName}'?\n\nThis action cannot be undone."
+        }
+        
         AlertDialog.Builder(this)
             .setTitle("Delete Workflow")
-            .setMessage("Are you sure you want to delete '${workflow.workflowName}'?\n\nThis action cannot be undone.")
+            .setMessage(message)
             .setPositiveButton("Delete") { _, _ ->
                 deleteWorkflow(workflow)
             }
@@ -172,12 +190,19 @@ class WorkflowListActivity : AppCompatActivity() {
                 """.trimIndent()
             }
             WorkflowType.DOCUMENT_ANALYSIS -> {
+                val analysisCount = documentStorageService.getAnalysisCountForWorkflow(workflow.workflowId)
+                val analysisInfo = if (analysisCount > 0) {
+                    "\n\n📊 Stored Analyses: $analysisCount document(s)"
+                } else {
+                    "\n\n📊 No analyses stored yet"
+                }
+                
                 """
                 📄 Document Analysis Workflow
                 
                 Document Type: ${workflow.documentType}
                 Daily Summary Time: ${workflow.scheduledTime}
-                Destination: ${getDestinationText(workflow)}
+                Destination: ${getDestinationText(workflow)}$analysisInfo
                 
                 This workflow automatically:
                 • Detects documents in new photos

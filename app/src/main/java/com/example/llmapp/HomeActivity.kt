@@ -250,8 +250,10 @@ class HomeActivity : ComponentActivity() {
         
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.menu_create_new_workflow -> {
-                    startActivity(Intent(this, NewWorkflowCreateActivity::class.java))
+                R.id.menu_image_workflow -> {
+                    // Navigate to Image Workflow List Activity
+                    val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowListActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.menu_manage_workflows -> {

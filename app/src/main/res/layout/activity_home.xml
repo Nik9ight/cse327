@@ -109,7 +109,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="🤖 IMAGE WORKFLOWS" />
+            android:text="🤖 IMAGE WORKFLOWS"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/enhancedImageWorkflowButton"
@@ -117,7 +118,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="🚀 ENHANCED IMAGE WORKFLOWS" />
+            android:text="🚀 ENHANCED IMAGE WORKFLOWS"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/llmButton"

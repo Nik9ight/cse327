@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
+    <!-- Hidden for now -->
+    <!--<item
         android:id="@+id/menu_create_new_workflow"
-        android:title="Create New Workflow" />
+        android:title="Create New Workflow" />-->
+    <item
+        android:id="@+id/menu_image_workflow"
+        android:title="Image Workflow" />
     <item
         android:id="@+id/menu_manage_workflows"
-        android:title="Manage Workflows" />
+        android:title="General Workflows" />
     <item
         android:id="@+id/menu_workflow_help"
         android:title="Help &amp; Features" />
