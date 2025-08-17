@@ -1,5 +1,6 @@
 package com.example.llmapp
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import com.example.llmapp.geofence.GeofenceActivity
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -40,7 +42,7 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        
+
         // Start the blinking dot animation
         findViewById<ImageView>(R.id.blinkingDot)?.let { blinkingDot ->
             (blinkingDot.drawable as? AnimationDrawable)?.start()
@@ -73,10 +75,10 @@ class HomeActivity : ComponentActivity() {
                 login.signIn()
             }
         }
-        
+
         // Initial button state update
         updateSignInButtonState()
-        
+
         enablePermissionsButton.setOnClickListener {
             if (!permissions.hasPermissions(requiredPermissions)) {
                 permissions.requestPermissions(requiredPermissions, RC_PERMISSIONS)
@@ -87,74 +89,85 @@ class HomeActivity : ComponentActivity() {
                     val intent = Intent(this, BatteryOptimizationActivity::class.java)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this, "All permissions granted for background execution", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "All permissions granted for background execution",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
-        
+
         pipelineButton.setOnClickListener { view ->
             showPipelineMenu(view)
         }
-        
+
         workflowsButton.setOnClickListener {
             startActivity(Intent(this, WorkflowListActivity::class.java))
         }
-        
+
         newWorkflowsButton.setOnClickListener { view ->
             showNewWorkflowMenu(view)
         }
-        
+
         llmButton.setOnClickListener { view ->
             showLLMMenu(view)
         }
-        
+
         geofenceButton.setOnClickListener {
             val intent = Intent(this, GeofenceActivity::class.java)
             startActivity(intent)
         }
-        
+
         imageWorkflowButton.setOnClickListener {
             // Primary workflow interface
-            val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowListActivity::class.java)
+            val intent = Intent(
+                this,
+                com.example.llmapp.workflows.activities.WorkflowListActivity::class.java
+            )
             startActivity(intent)
         }
-        
+
         enhancedImageWorkflowButton.setOnClickListener {
             // Quick workflow creation
-            val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowCreationActivity::class.java)
+            val intent = Intent(
+                this,
+                com.example.llmapp.workflows.activities.WorkflowCreationActivity::class.java
+            )
             startActivity(intent)
         }
-        
+
         // Exit icon click handler
         exitIcon.setOnClickListener {
             AppExitManager.showExitConfirmation(this) {
                 // Show progress while exiting
-                val progressToast = Toast.makeText(this, "Stopping background services...", Toast.LENGTH_LONG)
+                val progressToast =
+                    Toast.makeText(this, "Stopping background services...", Toast.LENGTH_LONG)
                 progressToast.show()
-                
+
                 AppExitManager.exitApp(this) {
                     // Cancel the progress toast
                     progressToast.cancel()
-                    
+
                     // Show completion message
                     Toast.makeText(this, "App stopped successfully", Toast.LENGTH_SHORT).show()
-                    
+
                     // Close the activity after services are stopped
                     finishAffinity() // Closes all activities in the task
                 }
             }
         }
-        
+
         // Long press for debug info
         exitIcon.setOnLongClickListener {
             showServiceDebugInfo()
             true
         }
-        
+
         // Initialize background service for workflows
         initializeBackgroundServices()
     }
-    
+
     private fun initializeBackgroundServices() {
         try {
             // Start the background service for workflow execution
@@ -173,19 +186,22 @@ class HomeActivity : ComponentActivity() {
         super.onResume()
         // Update button state when returning to the activity
         updateSignInButtonState()
-        
+
         // Check battery optimization status and prompt if needed
         checkBatteryOptimization()
     }
-    
+
     private fun checkBatteryOptimization() {
         // Only check after basic permissions are granted
         if (permissions.hasPermissions(requiredPermissions)) {
             // Check if user disabled the reminder
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
             val reminderDisabled = prefs.getBoolean("battery_reminder_disabled", false)
-            
-            if (!reminderDisabled && !BackgroundPermissionManager.isIgnoringBatteryOptimizations(this)) {
+
+            if (!reminderDisabled && !BackgroundPermissionManager.isIgnoringBatteryOptimizations(
+                    this
+                )
+            ) {
                 // Show a subtle reminder about battery optimization
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                     showBatteryOptimizationReminder()
@@ -193,7 +209,7 @@ class HomeActivity : ComponentActivity() {
             }
         }
     }
-    
+
     private fun showBatteryOptimizationReminder() {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Background Execution")
@@ -215,7 +231,7 @@ class HomeActivity : ComponentActivity() {
 
     private fun updateSignInButtonState() {
         val signInButton = findViewById<Button>(R.id.signInButton)
-        
+
         if (login.isSignedIn()) {
             signInButton.text = "SIGN OUT"
         } else {
@@ -226,89 +242,103 @@ class HomeActivity : ComponentActivity() {
     private fun showPipelineMenu(view: android.view.View) {
         val popup = PopupMenu(this, view)
         popup.menuInflater.inflate(R.menu.pipeline_menu, popup.menu)
-        
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_email_to_telegram -> {
                     startActivity(Intent(this, PipelineActivity::class.java))
                     true
                 }
+
                 R.id.menu_telegram_to_gmail -> {
                     startActivity(Intent(this, TelegramToGmailActivity::class.java))
                     true
                 }
+
                 else -> false
             }
         }
-        
+
         popup.show()
     }
 
     private fun showNewWorkflowMenu(view: android.view.View) {
         val popup = PopupMenu(this, view)
         popup.menuInflater.inflate(R.menu.new_workflow_menu, popup.menu)
-        
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_image_workflow -> {
                     // Navigate to Image Workflow List Activity
-                    val intent = Intent(this, com.example.llmapp.workflows.activities.WorkflowListActivity::class.java)
+                    val intent = Intent(
+                        this,
+                        com.example.llmapp.workflows.activities.WorkflowListActivity::class.java
+                    )
                     startActivity(intent)
                     true
                 }
+
                 R.id.menu_manage_workflows -> {
                     startActivity(Intent(this, NewWorkflowListActivity::class.java))
                     true
                 }
+
                 R.id.menu_workflow_help -> {
                     showWorkflowHelp()
                     true
                 }
+
                 else -> false
             }
         }
-        
+
         popup.show()
     }
-    
+
     private fun showWorkflowHelp() {
-        Toast.makeText(this, """
+        Toast.makeText(
+            this, """
             New Workflows Features:
             • Create automated workflows
             • Run continuously with intervals
             • Gmail ↔ Telegram integration
             • Enhanced formatting strategies
             • Better error handling
-        """.trimIndent(), Toast.LENGTH_LONG).show()
+        """.trimIndent(), Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun showLLMMenu(view: android.view.View) {
         val popup = PopupMenu(this, view)
         popup.menuInflater.inflate(R.menu.llm_menu, popup.menu)
-        
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_m1 -> {
                     startActivity(Intent(this, M1Activity::class.java))
                     true
                 }
+
                 R.id.menu_m2_multimodal -> {
                     startActivity(Intent(this, MainActivity::class.java))
                     true
                 }
+
                 else -> false
             }
         }
-        
+
         popup.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 9001) { // Google Sign-In
-            login.handleSignInResult(data,
+            login.handleSignInResult(
+                data,
                 onSuccess = { account: GoogleSignInAccount ->
-                    Toast.makeText(this, "Signed in as: ${account.displayName}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Signed in as: ${account.displayName}", Toast.LENGTH_SHORT)
+                        .show()
                     updateSignInButtonState()
                 },
                 onError = { errorMsg ->
@@ -318,17 +348,18 @@ class HomeActivity : ComponentActivity() {
             )
         }
     }
-    
+
     /**
      * Show debug info about background services (triggered by long-press on exit icon)
      */
     private fun showServiceDebugInfo() {
         val isRunning = ServiceManager.isServiceRunning(this)
         val batteryOptimized = !BackgroundPermissionManager.isIgnoringBatteryOptimizations(this)
-        
+
         // Check if image workflow service is running
-        val imageWorkflowRunning = isServiceRunning("com.example.llmapp.workflows.services.ImageWorkflowBackgroundService")
-        
+        val imageWorkflowRunning =
+            isServiceRunning("com.example.llmapp.workflows.services.ImageWorkflowBackgroundService")
+
         val debugInfo = buildString {
             appendLine("🔧 Service Debug Info")
             appendLine("━━━━━━━━━━━━━━━━━━━━")
@@ -343,7 +374,7 @@ class HomeActivity : ComponentActivity() {
             appendLine("")
             appendLine("💡 Long press to restart service")
         }
-        
+
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Debug Information")
             .setMessage(debugInfo)
@@ -352,9 +383,6 @@ class HomeActivity : ComponentActivity() {
                 // Also try to restart image workflow service if it exists
                 restartImageWorkflowService()
                 Toast.makeText(this, "Services restart requested", Toast.LENGTH_SHORT).show()
-            .setPositiveButton("Restart Service") { _, _ ->
-                ServiceManager.startBackgroundService(this)
-                Toast.makeText(this, "Service restart requested", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Close", null)
             .setNeutralButton("Open Battery Settings") { _, _ ->
@@ -362,55 +390,74 @@ class HomeActivity : ComponentActivity() {
                 startActivity(intent)
             }
             .show()
-    }
-    
-    /**
-     * Try to restart the image workflow service
-     */
-    private fun restartImageWorkflowService() {
-        try {
-            // Stop first
-            val stopIntent = Intent(this, com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java)
-            stopService(stopIntent)
-            
-            // Check if there's saved configuration to restart with
-            val prefs = getSharedPreferences("image_workflow_prefs", MODE_PRIVATE)
-            val personEnabled = prefs.getBoolean("person_workflow_enabled", false)
-            val receiptEnabled = prefs.getBoolean("receipt_workflow_enabled", false)
-            
-            if (personEnabled || receiptEnabled) {
-                // Start with saved configuration
-                val startIntent = Intent(this, com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java)
-                startIntent.putExtra("person_workflow_enabled", personEnabled)
-                startIntent.putExtra("receipt_workflow_enabled", receiptEnabled)
-                startIntent.putExtra("person_workflow_chat_id", prefs.getString("person_workflow_chat_id", ""))
-                startIntent.putExtra("receipt_workflow_chat_id", prefs.getString("receipt_workflow_chat_id", ""))
-                startIntent.putExtra("target_subject", prefs.getString("target_subject", ""))
-                startIntent.putExtra("receipt_summary_time", prefs.getString("receipt_summary_time", "20:00"))
-                
-                startForegroundService(startIntent)
-                Log.d("HomeActivity", "Image workflow service restarted with saved configuration")
+        }
+        /**
+         * Try to restart the image workflow service
+         */
+        private fun restartImageWorkflowService() {
+            try {
+                // Stop first
+                val stopIntent = Intent(
+                    this,
+                    com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java
+                )
+                stopService(stopIntent)
+
+                // Check if there's saved configuration to restart with
+                val prefs = getSharedPreferences("image_workflow_prefs", MODE_PRIVATE)
+                val personEnabled = prefs.getBoolean("person_workflow_enabled", false)
+                val receiptEnabled = prefs.getBoolean("receipt_workflow_enabled", false)
+
+                if (personEnabled || receiptEnabled) {
+                    // Start with saved configuration
+                    val startIntent = Intent(
+                        this,
+                        com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java
+                    )
+                    startIntent.putExtra("person_workflow_enabled", personEnabled)
+                    startIntent.putExtra("receipt_workflow_enabled", receiptEnabled)
+                    startIntent.putExtra(
+                        "person_workflow_chat_id",
+                        prefs.getString("person_workflow_chat_id", "")
+                    )
+                    startIntent.putExtra(
+                        "receipt_workflow_chat_id",
+                        prefs.getString("receipt_workflow_chat_id", "")
+                    )
+                    startIntent.putExtra("target_subject", prefs.getString("target_subject", ""))
+                    startIntent.putExtra(
+                        "receipt_summary_time",
+                        prefs.getString("receipt_summary_time", "20:00")
+                    )
+
+                    startForegroundService(startIntent)
+                    Log.d(
+                        "HomeActivity",
+                        "Image workflow service restarted with saved configuration"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("HomeActivity", "Error restarting image workflow service", e)
             }
-        } catch (e: Exception) {
-            Log.e("HomeActivity", "Error restarting image workflow service", e)
+        }
+
+        /**
+         * Check if a specific service is running
+         */
+        private fun isServiceRunning(serviceClassName: String): Boolean {
+            return try {
+                val activityManager =
+                    getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+
+                @Suppress("DEPRECATION")
+                val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
+
+                runningServices.any { service ->
+                    service.service.className == serviceClassName
+                }
+            } catch (e: Exception) {
+                Log.e("HomeActivity", "Error checking if service is running", e)
+                false
+            }
         }
     }
-    
-    /**
-     * Check if a specific service is running
-     */
-    private fun isServiceRunning(serviceClassName: String): Boolean {
-        return try {
-            val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-            @Suppress("DEPRECATION")
-            val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
-            
-            runningServices.any { service -> 
-                service.service.className == serviceClassName
-            }
-        } catch (e: Exception) {
-            Log.e("HomeActivity", "Error checking if service is running", e)
-            false
-        }
-    }
-}

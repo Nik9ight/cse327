@@ -81,7 +81,68 @@ class ServiceManager {
                 false
             }
         }
-        
+        /**
+         * Start image workflow service if there are active workflows
+         */
+        fun startImageWorkflowServiceIfNeeded(context: Context): Boolean {
+            return try {
+                val workflowManager =
+                    com.example.llmapp.workflows.services.WorkflowConfigManager(context)
+                val workflows = workflowManager.getAllWorkflows()
+
+                if (workflows.isNotEmpty() && !isImageWorkflowServiceRunning(context)) {
+                    Log.d(TAG, "Starting image workflow service for ${workflows.size} workflows")
+
+                    val serviceIntent = Intent(
+                        context,
+                        com.example.llmapp.workflows.services.ImageWorkflowBackgroundService::class.java
+                    )
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        try {
+                            context.startForegroundService(serviceIntent)
+                        } catch (e: Exception) {
+                            Log.w(
+                                TAG,
+                                "Cannot start image workflow foreground service, trying regular service",
+                                e
+                            )
+                            context.startService(serviceIntent)
+                        }
+                    } else {
+                        context.startService(serviceIntent)
+                    }
+
+                    Log.d(TAG, "Image workflow service started")
+                    true
+                } else if (workflows.isEmpty()) {
+                    Log.d(TAG, "No image workflows configured, skipping image workflow service")
+                    true
+                } else {
+                    Log.d(TAG, "Image workflow service already running")
+                    true
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start image workflow service", e)
+                false
+            }
+        }
+        /**
+         * Check if the image workflow background service is running
+         */
+        fun isImageWorkflowServiceRunning(context: Context): Boolean {
+            return try {
+                val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                val services = activityManager.getRunningServices(Integer.MAX_VALUE)
+
+                services.any { service ->
+                    service.service.className == "com.example.llmapp.workflows.services.ImageWorkflowBackgroundService"
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking image workflow service status", e)
+                false
+            }
+        }
         /**
          * Get the current status of background execution
          */
