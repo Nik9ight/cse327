@@ -56,10 +56,7 @@ object AppExitManager {
         Log.d(TAG, "Stopping all background services with force if needed...")
         
         try {
-            // Stop image workflow services specifically
-            stopImageWorkflowServices(context)
-            
-            // First try graceful stop for other services
+            // First try graceful stop
             Log.d(TAG, "Attempting graceful service stop...")
             ServiceManager.stopBackgroundService(context)
             

@@ -1,6 +1,5 @@
 package com.example.llmapp
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -337,6 +336,10 @@ class HomeActivity : ComponentActivity() {
             appendLine("Permissions: ${if (permissions.hasPermissions(requiredPermissions)) "✅ Granted" else "❌ Missing"}")
             appendLine("")
             appendLine("💡 Long press to restart services")
+            appendLine("Battery Optimization: ${if (batteryOptimized) "⚠️ Enabled (May kill service)" else "✅ Disabled"}")
+            appendLine("Permissions: ${if (permissions.hasPermissions(requiredPermissions)) "✅ Granted" else "❌ Missing"}")
+            appendLine("")
+            appendLine("💡 Long press to restart service")
         }
         
         androidx.appcompat.app.AlertDialog.Builder(this)
@@ -347,6 +350,9 @@ class HomeActivity : ComponentActivity() {
                 // Also try to restart image workflow service if it exists
                 restartImageWorkflowService()
                 Toast.makeText(this, "Services restart requested", Toast.LENGTH_SHORT).show()
+            .setPositiveButton("Restart Service") { _, _ ->
+                ServiceManager.startBackgroundService(this)
+                Toast.makeText(this, "Service restart requested", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Close", null)
             .setNeutralButton("Open Battery Settings") { _, _ ->

@@ -24,14 +24,9 @@ class BootCompletedReceiver : BroadcastReceiver() {
                 try {
                     // Use a delay to ensure system is ready
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        // Start general workflow services
                         WorkflowBackgroundService.start(context)
                         WorkflowWatchdogService.start(context)
-                        
-                        // Start image workflow service if there are active image workflows
-                        startImageWorkflowServiceIfNeeded(context)
-                        
-                        Log.d(TAG, "All background services started successfully after boot")
+                        Log.d(TAG, "Background services started successfully after boot")
                     }, 5000) // 5 second delay
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to start background services", e)

@@ -530,10 +530,6 @@ class WorkflowCreateActivity : ComponentActivity() {
                     result.fold(
                         onSuccess = { workflow ->
                             showSuccess(if (editMode) "Workflow updated successfully!" else "Workflow created successfully!")
-                            
-                            // Start image workflow service if needed now that workflows exist
-                            ServiceManager.startImageWorkflowServiceIfNeeded(this@WorkflowCreateActivity)
-                            
                             setResult(RESULT_OK)
                             finish()
                         },

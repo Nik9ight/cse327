@@ -4,11 +4,6 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    
-    <!-- Android 13+ (API 33+) media permissions -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -32,18 +27,10 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
     
-    <!-- For Android 14+ background service restrictions -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    
     <!-- For Android 12+ background restrictions -->
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
-    
-    <!-- Image Processing Permissions -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:name=".LLMApplication"
@@ -137,44 +124,7 @@
             android:theme="@style/Theme.LLMAPP"
             android:label="Geofence Manager" />
             
-        <!-- Legacy Image Workflow Activity (deprecated) -->
-        <activity
-            android:name=".workflows.ui.ImageWorkflowActivity"
-            android:exported="false"
-            android:theme="@style/Theme.LLMAPP"
-            android:label="Person Detection Setup"
-            android:enabled="false" />
-            
-        <!-- DEPRECATED: Enhanced Image Workflow Activities (Legacy) -->
-        <activity
-            android:name=".workflows.ui.EnhancedWorkflowCreateActivity"
-            android:exported="false"
-            android:theme="@style/Theme.LLMAPP"
-            android:label="Create Enhanced Workflow"
-            android:enabled="false" />
-            
-        <activity
-            android:name=".workflows.ui.EnhancedWorkflowListActivity"
-            android:exported="false"
-            android:theme="@style/Theme.LLMAPP"
-            android:label="Enhanced Image Workflows"
-            android:enabled="false" />
-            
-        <!-- PRIMARY: Image Workflow Activities (Current Implementation) -->
-        <activity
-            android:name=".workflows.activities.WorkflowListActivity"
-            android:exported="false"
-            android:theme="@style/Theme.LLMAPP"
-            android:label="Image Workflows" />
-            
-        <activity
-            android:name=".workflows.activities.WorkflowCreationActivity"
-            android:exported="false"
-            android:theme="@style/Theme.LLMAPP"
-            android:label="Create Image Workflow" />
-            
         <!-- Background Services for Workflow Execution -->
-        <!-- General workflow background service with notifications -->
         <service
             android:name=".service.WorkflowBackgroundService"
             android:exported="false"
@@ -194,15 +144,6 @@
             android:exported="false"
             android:enabled="true"
             android:stopWithTask="false" />
-            
-        <!-- PRIMARY: Enhanced Image Processing Workflow Service -->
-        <service
-            android:name=".workflows.services.ImageWorkflowBackgroundService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"
-            android:enabled="true"
-            android:stopWithTask="false"
-            android:process=":workflow" />
             
         <!-- Broadcast Receivers -->
         <receiver

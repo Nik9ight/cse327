@@ -3,14 +3,14 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-08-14T19:12:51.738222Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CX5144MQM" />
-            </handle>
-          </Target>
-        </DropdownSelection>
+<option name="selectionMode" value="DROPDOWN" />
+<DropdownSelection timestamp="2025-08-14T19:12:51.738222Z">
+  <Target type="DEFAULT_BOOT">
+    <handle>
+      <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CX5144MQM" />
+    </handle>
+  </Target>
+</DropdownSelection>
         <DialogSelection />
       </SelectionState>
     </selectionStates>
