@@ -37,3 +37,7 @@ jacoco.exec
 
 # App-specific generated files
 /schemas/
+
+# Markdown files (except README.md)
+*.md
+!README.md

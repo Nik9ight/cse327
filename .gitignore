@@ -88,6 +88,10 @@ Thumbs.db
 # App specific 
 app/release/
 
+# Markdown files (except README.md)
+*.md
+!README.md
+
 # API Keys and Sensitive Files - NEVER COMMIT THESE
 google-services.json
 *.jks
